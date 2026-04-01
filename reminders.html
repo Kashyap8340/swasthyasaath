@@ -6,7 +6,6 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>SwasthyaSaathi AI - Vaccination &amp; Medicine Reminders</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap"
         rel="stylesheet" />
     <link
@@ -15,25 +14,6 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#0ea5e9", // Medical Blue
-                        "secondary": "#22c55e", // Soft Green
-                        "background-light": "#f8fafc",
-                        "background-dark": "#0f172a",
-                    },
-                    fontFamily: {
-                        "display": ["Public Sans", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-                },
-            },
-        }
-    </script>
     <style>
         body {
             font-family: 'Public Sans', sans-serif;
@@ -43,6 +23,7 @@
             font-size: 24px;
         }
     </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
@@ -248,30 +229,36 @@
                             <h3 class="text-xl font-bold">Set New Reminder</h3>
                             <p class="text-xs text-slate-500 mt-1">Add a medicine or vaccine schedule</p>
                         </div>
-                        <form class="space-y-4">
+                        <form class="space-y-4" id="reminderForm">
+                            <div>
+                                <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Email Address</label>
+                                <input id="reminderEmail"
+                                    class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 focus:ring-primary"
+                                    placeholder="your@email.com" type="email" required />
+                            </div>
                             <div>
                                 <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Name / Item</label>
-                                <input
+                                <input id="reminderName"
                                     class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700 focus:ring-primary"
-                                    placeholder="e.g. Polio Vaccine" type="text" />
+                                    placeholder="e.g. Polio Vaccine" type="text" required />
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Date</label>
-                                    <input
+                                    <input id="reminderDate"
                                         class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
-                                        type="date" />
+                                        type="date" required />
                                 </div>
                                 <div>
                                     <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Time</label>
-                                    <input
+                                    <input id="reminderTime"
                                         class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
-                                        type="time" />
+                                        type="time" required />
                                 </div>
                             </div>
                             <div>
                                 <label class="text-sm font-bold text-slate-700 dark:text-slate-300">Type</label>
-                                <select
+                                <select id="reminderType"
                                     class="mt-1 w-full rounded-xl border-slate-200 bg-slate-50 dark:bg-slate-800 dark:border-slate-700">
                                     <option>Vaccine</option>
                                     <option>Medicine</option>
@@ -282,20 +269,15 @@
                                     Method</label>
                                 <div class="mt-2 flex gap-4">
                                     <label class="flex items-center gap-2 cursor-pointer">
-                                        <input checked="" class="rounded text-primary focus:ring-primary"
+                                        <input checked="" disabled class="rounded text-primary focus:ring-primary bg-slate-200"
                                             type="checkbox" />
-                                        <span class="text-sm font-medium">SMS</span>
-                                    </label>
-                                    <label class="flex items-center gap-2 cursor-pointer">
-                                        <input class="rounded text-primary focus:ring-primary" type="checkbox" />
                                         <span class="text-sm font-medium">Email</span>
                                     </label>
                                 </div>
                             </div>
-                            <button
+                            <button id="submitReminderBtn"
                                 class="w-full rounded-xl bg-primary py-3 font-bold text-white transition hover:bg-primary/90 shadow-lg shadow-primary/20"
-                                onclick="event.preventDefault(); document.getElementById('success-modal').classList.remove('hidden')">Set
-                                Reminder</button>
+                                type="submit">Set Reminder</button>
                         </form>
                     </section>
                     <!-- Upcoming Reminders -->
@@ -378,9 +360,10 @@
             </h3>
             <div class="mt-4">
                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                    You will receive a notification via SMS for your <span
-                        class="font-bold text-slate-700 dark:text-slate-200">Upcoming BCG Vaccine</span> on <span
-                        class="font-bold text-slate-700 dark:text-slate-200">Tomorrow, 10 AM</span>.
+                    You have successfully scheduled an email reminder for <span
+                        class="font-bold text-slate-700 dark:text-slate-200" id="modal-item-name">Upcoming BCG Vaccine</span> on <span
+                        class="font-bold text-slate-700 dark:text-slate-200" id="modal-item-time">Tomorrow, 10 AM</span>.<br/><br/>
+                    An immediate confirmation email has been sent to your address, and you will receive another alert 15 minutes before this scheduled time.
                 </p>
             </div>
             <div class="mt-8">
@@ -479,6 +462,48 @@
             if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileNav);
             if (closeMobileNavBtn) closeMobileNavBtn.addEventListener('click', closeMobileNav);
             if (mobileNavOverlay) mobileNavOverlay.addEventListener('click', closeMobileNav);
+            
+            // Handle form submission
+            const reminderForm = document.getElementById('reminderForm');
+            if (reminderForm) {
+                reminderForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = document.getElementById('submitReminderBtn');
+                    const originalText = btn.innerText;
+                    btn.innerText = 'Setting Reminder...';
+                    btn.disabled = true;
+
+                    const name = document.getElementById('reminderName').value;
+                    const email = document.getElementById('reminderEmail').value;
+                    const date = document.getElementById('reminderDate').value;
+                    const time = document.getElementById('reminderTime').value;
+                    const type = document.getElementById('reminderType').value;
+
+                    try {
+                        const res = await fetch('/api/reminder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, email, date, time, type })
+                        });
+                        
+                        const data = await res.json();
+                        if (res.ok && data.success) {
+                            // Update Modal Details dynamically
+                            document.getElementById('modal-item-name').innerText = name;
+                            document.getElementById('modal-item-time').innerText = `${date} at ${time}`;
+                            document.getElementById('success-modal').classList.remove('hidden');
+                            reminderForm.reset();
+                        } else {
+                            alert(data.error || 'Failed to set reminder.');
+                        }
+                    } catch (err) {
+                        alert('Connection error occurred while setting the reminder.');
+                    } finally {
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                });
+            }
         });
     </script>
 

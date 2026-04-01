@@ -6,7 +6,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>SwasthyaSaathi AI - Chat</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <!-- Replaced Tailwind CDN with local style.css to fix UI rendering issues on network -->
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap"
         rel="stylesheet" />
@@ -16,26 +17,6 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#0284c7",
-                        "background-light": "#f8fafc",
-                        "background-dark": "#0f172a",
-                        "medical-green": "#22c55e",
-                        "medical-blue-soft": "#e0f2fe"
-                    },
-                    fontFamily: {
-                        "display": ["Public Sans", "sans-serif"]
-                    },
-                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
-                },
-            },
-        }
-    </script>
     <style>
         body {
             font-family: 'Public Sans', sans-serif;
@@ -52,6 +33,129 @@
         .hide-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 0;
+            height: 24px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #0ea5e9;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ── Voice Recording UI ──────────────────────────────── */
+        #voiceRecordingBar {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+            border-radius: 16px;
+            color: white;
+            animation: slideUp 0.3s ease;
+        }
+        #voiceRecordingBar.active { display: flex; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .rec-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #ff4444;
+            animation: recPulse 1s infinite;
+            flex-shrink: 0;
+        }
+        @keyframes recPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        #recTimer { font-size: 13px; font-weight: 700; letter-spacing: 1px; min-width: 40px; }
+
+        .waveform {
+            display: flex; align-items: center; gap: 3px; flex: 1;
+        }
+        .waveform span {
+            display: inline-block;
+            width: 3px; border-radius: 3px;
+            background: rgba(255,255,255,0.8);
+            animation: wave 0.8s infinite ease-in-out;
+        }
+        .waveform span:nth-child(1)  { animation-delay: 0.0s; height: 6px; }
+        .waveform span:nth-child(2)  { animation-delay: 0.1s; height: 14px; }
+        .waveform span:nth-child(3)  { animation-delay: 0.2s; height: 10px; }
+        .waveform span:nth-child(4)  { animation-delay: 0.1s; height: 18px; }
+        .waveform span:nth-child(5)  { animation-delay: 0.3s; height: 8px; }
+        .waveform span:nth-child(6)  { animation-delay: 0.2s; height: 14px; }
+        .waveform span:nth-child(7)  { animation-delay: 0.0s; height: 6px; }
+        .waveform span:nth-child(8)  { animation-delay: 0.15s; height: 12px; }
+        .waveform span:nth-child(9)  { animation-delay: 0.25s; height: 10px; }
+        .waveform span:nth-child(10) { animation-delay: 0.1s; height: 16px; }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.7; }
+            50%       { transform: scaleY(1.4); opacity: 1; }
+        }
+
+        #cancelRecBtn {
+            background: rgba(255,255,255,0.2);
+            border: none; border-radius: 50%;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: white; flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        #cancelRecBtn:hover { background: rgba(255,255,255,0.35); }
+
+        /* Mic button — active while recording */
+        #micBtn.recording {
+            background: #ef4444 !important;
+            animation: micPulse 1s infinite;
+        }
+        @keyframes micPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+        }
+
+        /* Voice message bubble */
+        .voice-bubble {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 14px;
+            min-width: 220px;
+        }
+        .voice-play-btn {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #0ea5e9;
+            border: none; color: white; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.2s, transform 0.1s;
+        }
+        .voice-play-btn:hover { background: #0284c7; transform: scale(1.05); }
+        .voice-waveform { flex: 1; height: 28px; position: relative; }
+        .voice-waveform canvas { width: 100%; height: 100%; }
+        .voice-duration { font-size: 11px; color: #64748b; font-weight: 600; min-width: 30px; }
+        .voice-transcription {
+            font-size: 11px; color: #64748b; font-style: italic;
+            margin-top: 4px; padding: 0 14px 6px;
         }
     </style>
 </head>
@@ -138,13 +242,23 @@
                                     Locate Center</p>
                             </div>
                         </div>
-                        <div class="w-full aspect-video rounded-lg overflow-hidden bg-slate-200 relative mb-2">
-                            <div class="absolute inset-0 bg-cover bg-center"
-                                data-alt="Map showing nearby healthcare facilities" data-location="New Delhi"
-                                style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC5uxTHEBUF_BNvkXBQa0CZ282Nagqsad3YQ1PyRhURw6C47hVttAhvLyVBny2SZFds57Yp8uTCfA8SAw2kvtgRjDX-Ozbyd0fVCPNcBwIcX5v6IjaFIhD3jnj05-jWH0ukEknIqqQX1pHmIA1v2UU1GHXQANaEaf3T86RqTVIJs9q__-f9kEit1iVyeYKbilzQOtnxeXeXSLAbHwwr8kHghU0B7QrZy-OEn0IqwHHbPaRGZktsddjwNlpHavSFwyawojHJsim6So4');">
-                            </div>
+                        <div class="w-full aspect-video rounded-lg overflow-hidden relative mb-2 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <!-- Live Google Maps Snippet querying for nearest doctors -->
+                            <iframe 
+                                title="Nearest Healthcare Providers"
+                                src="https://maps.google.com/maps?q=nearest+doctor+clinic+hospital&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                                width="100%" 
+                                height="100%" 
+                                frameborder="0" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                aria-hidden="false" 
+                                tabindex="0">
+                            </iframe>
                         </div>
                         <button
+                            onclick="window.open('https://www.google.com/maps/search/nearest+doctor+clinic+hospital', '_blank')"
                             class="w-full py-2 bg-white dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800 rounded-lg text-primary dark:text-blue-300 text-xs font-bold hover:bg-blue-100 transition-colors">
                             View Directions
                         </button>
@@ -229,7 +343,7 @@
                     </div>
                     <div
                         class="bg-white dark:bg-slate-800 p-5 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700">
-                        <p class="text-base leading-relaxed">Namaste! I am your health assistant. How can I help you
+                        <p class="text-base leading-relaxed">Namaste! I am your SwasthyaSaathi AI health assistant. How can I help you
                             today? You can ask me about common illnesses, healthy habits, or nearest medical facilities.
                         </p>
                     </div>
@@ -253,13 +367,27 @@
                             Nearby health centers?
                         </button>
                     </div>
+                    <!-- WhatsApp-style recording bar (shown while recording) -->
+                    <div id="voiceRecordingBar">
+                        <div class="rec-dot"></div>
+                        <span id="recTimer">0:00</span>
+                        <div class="waveform">
+                            <span></span><span></span><span></span><span></span><span></span>
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <button id="cancelRecBtn" title="Cancel recording">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
+                    </div>
                     <div class="relative flex items-center gap-2 sm:gap-3">
-                        <div class="relative flex-1">
+                    <div class="relative flex-1">
                             <input id="chatInput"
                                 class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-3.5 sm:py-4 pl-5 sm:pl-6 pr-12 sm:pr-14 text-sm sm:text-base focus:ring-2 focus:ring-primary/50 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                 placeholder="Ask a health question..." type="text" />
-                            <button
-                                class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-primary transition-colors">
+                            <!-- Mic button: tap to start/stop recording -->
+                            <button id="micBtn"
+                                title="Hold to record voice message"
+                                class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-primary transition-colors rounded-full">
                                 <span class="material-symbols-outlined text-xl">mic</span>
                             </button>
                         </div>
@@ -295,7 +423,7 @@
 
             const SYSTEM_PROMPT = {
                 role: "system",
-                content: "You are SwasthyaSaathi AI, a helpful and reliable health assistant. Your goal is to provide general healthcare awareness, information on diseases, and prevention techniques. Do not provide medical diagnosis. If a user presents severe symptoms, always advise them to seek immediate medical help or call emergency services like 108. CRITICAL: You must ONLY answer questions related to health, medical conditions, wellness, or the SwasthyaSaathi app. If a user asks something unrelated (e.g., coding, math, general trivia, politics), politely refuse to answer and remind them you are a health assistant. Format your responses using markdown. Use bullet points for lists, short paragraphs for readability, and bold text to emphasize important information or key terms. IMPORTANT INSTRUCTION: At the very end of EVERY response, you MUST provide exactly 3 short follow-up questions the user could ask next. Prefix this section exactly with '|||SUGGESTIONS|||' followed by the questions separated by '|'. Example: |||SUGGESTIONS|||What is Dengue?|How to prevent malaria?|Nearest hospital?"
+                content: "You are SwasthyaSaathi AI, a helpful and reliable health assistant. Your goal is to provide general healthcare awareness, information on diseases, and prevention techniques. Explain everything in VERY SIMPLE, easy-to-understand language. Do not use complex medical jargon. Do not provide medical diagnosis. If a user presents severe symptoms, always advise them to seek immediate medical help or call emergency services like 108. CRITICAL: You must ONLY answer questions related to health, medical conditions, wellness, or the SwasthyaSaathi app. If a user asks something unrelated (e.g., coding, math, general trivia, politics), politely refuse to answer and remind them you are a health assistant. Format your responses using markdown. Use bullet points for lists, short paragraphs for readability, and bold text to emphasize important information or key terms. IMPORTANT INSTRUCTION: At the very end of EVERY response, you MUST provide exactly 3 short follow-up questions the user could ask next. Prefix this section exactly with '|||SUGGESTIONS|||' followed by the questions separated by '|'. Example: |||SUGGESTIONS|||What is Dengue?|How to prevent malaria?|Nearest hospital?"
             };
 
             let messageHistory = [SYSTEM_PROMPT];
@@ -315,8 +443,8 @@
                 const msgHTML = `
             <div class="flex items-end gap-2 sm:gap-3 justify-end ml-auto max-w-[90%] sm:max-w-[80%]">
                 <div class="bg-primary text-white p-4 sm:p-5 rounded-2xl rounded-br-none shadow-md border border-primary">
-                    <p class="text-sm sm:text-base leading-relaxed">${text}</p>
-                    <span class="text-[10px] text-primary-soft opacity-80 font-medium block mt-2 text-right uppercase tracking-wide">${timeStr}</span>
+                    <p class="text-sm sm:text-base leading-relaxed">` + text + `</p>
+                    <span class="text-[10px] text-primary-soft opacity-80 font-medium block mt-2 text-right uppercase tracking-wide">` + timeStr + `</span>
                 </div>
                 <div class="size-7 sm:size-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mb-1">
                     <span class="material-symbols-outlined text-base sm:text-lg text-slate-500">person</span>
@@ -339,8 +467,14 @@
                     <span class="material-symbols-outlined text-base sm:text-lg">smart_toy</span>
                 </div>
                 <div class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700 w-full min-w-[200px]">
-                    <div class="text-sm sm:text-base leading-relaxed message-content prose prose-sm prose-slate dark:prose-invert max-w-none"></div>
-                    <span class="text-[10px] text-slate-400 font-medium block mt-2 uppercase tracking-wide">${timeStr}</span>
+                    <div class="text-sm sm:text-base leading-relaxed message-content prose prose-sm prose-slate dark:prose-invert max-w-none">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-medium block mt-2 uppercase tracking-wide">` + timeStr + `</span>
                 </div>
             `;
 
@@ -365,11 +499,49 @@
                     addRecentConsultation(text);
                 }
 
-                // Add user message to history
-                messageHistory.push({ role: "user", content: text });
-
                 // Create an empty AI bubble that we will populate via stream
                 const aiContentContainer = createAIBubble();
+                
+                let contextualizedText = text;
+                const locationKeywords = ["near", "closest", "around me", "where can i find", "clinic", "hospital", "doctor", "dentist", "pediatrician", "cardiologist", "dermatologist", "surgeon", "center"];
+                const wantsLocation = locationKeywords.some(kw => text.toLowerCase().includes(kw));
+
+                if (wantsLocation && navigator.geolocation) {
+                    aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-pulse">location_on</span> Getting location from your browser to answer accurately...</span>`;
+                    
+                    try {
+                        const pos = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 });
+                        });
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+
+                        // Fetch Live Data from Backend (Foursquare Primary -> OpenStreetMap Fallback)
+                        let livePlacesContext = "";
+                        try {
+                            aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Scanning live map databases for local clinics...</span>`;
+                            const mapRes = await fetch(`/api/places?lat=${lat}&lon=${lon}&query=${encodeURIComponent(text)}`);
+                            if (mapRes.ok) {
+                                const mapJson = await mapRes.json();
+                                if (mapJson.context) {
+                                    livePlacesContext = mapJson.context;
+                                }
+                            }
+                        } catch (e) {
+                            console.warn("Live places fetch failed", e);
+                        }
+
+                        contextualizedText = text + `\n\n[SYSTEM OVERRIDE: The user is asking for nearby healthcare. GPS: Lat ${lat}, Lon ${lon}. CRITICAL RULE: DO NOT apologize. DO NOT say you lack real-time data. \n${livePlacesContext ? livePlacesContext + '\nYou MUST present these clinics exactly as provided to the user! ' : ''}\n1. You MUST provide this exact clickable link: "[📍 Click here to see nearby options on Google Maps](https://www.google.com/maps/search/nearest+${encodeURIComponent(text.replace(/ /g, '+'))}+near+${lat},${lon})". 2. Format the real-world clinic names into a beautiful bulleted list. 3. DO NOT hallucinate fake phone numbers if they are missing.]`;
+                    } catch (err) {
+                        contextualizedText = text + `\n\n[URGENT HIDDEN INSTRUCTION: The user is asking for nearby healthcare, but browser location was denied. Ask them to enable permissions or type their exact City name securely.]`;
+                    }
+                    
+                    // Restore typing indicator for standard response processing
+                    aiContentContainer.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+                }
+
+                // Add user message to history
+                messageHistory.push({ role: "user", content: contextualizedText });
 
                 try {
                     // Send the POST request to our Express server
@@ -389,18 +561,21 @@
 
                     let done = false;
                     let fullResponse = "";
+                    let buffer = "";
 
                     while (!done) {
                         const { value, done: readerDone } = await reader.read();
                         done = readerDone;
 
                         if (value) {
-                            const chunkStr = decoder.decode(value, { stream: true });
-                            const lines = chunkStr.split('\n');
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
 
                             for (const line of lines) {
-                                if (line.startsWith('data: ')) {
-                                    const dataStr = line.slice(6);
+                                const trimmedLine = line.trim();
+                                if (trimmedLine.startsWith('data: ')) {
+                                    const dataStr = trimmedLine.slice(6);
                                     if (dataStr === '[DONE]') {
                                         done = true;
                                         break;
@@ -427,7 +602,7 @@
                                             scrollToBottom();
                                         }
                                     } catch (e) {
-                                        // Ignore JSON parse errors for incomplete chunks
+                                        // Ignore JSON parse errors for truly corrupted chunks that are somehow complete lines
                                     }
                                 }
                             }
@@ -549,25 +724,356 @@
 
             sendBtn.addEventListener('click', sendMessage);
             chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    sendMessage();
+                if (e.key === 'Enter') { sendMessage(); }
+            });
+
+            // ══════════════════════════════════════════════════════════════
+            // WhatsApp-style Voice Message Pipeline
+            // ══════════════════════════════════════════════════════════════
+            const micBtn            = document.getElementById('micBtn');
+            const voiceRecordingBar = document.getElementById('voiceRecordingBar');
+            const cancelRecBtn      = document.getElementById('cancelRecBtn');
+            const recTimerEl        = document.getElementById('recTimer');
+
+            let mediaRecorder   = null;
+            let audioChunks     = [];
+            let recTimerInterval = null;
+            let recSeconds      = 0;
+            let isRecording     = false;
+            let isProcessingVoice = false;
+            let globalAudioStream = null;
+
+            function formatTime(secs) {
+                return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+            }
+
+            function startRecTimer() {
+                recSeconds = 0;
+                recTimerEl.textContent = formatTime(0);
+                recTimerInterval = setInterval(() => {
+                    recSeconds++;
+                    recTimerEl.textContent = formatTime(recSeconds);
+                }, 1000);
+            }
+
+            function stopRecTimer() {
+                clearInterval(recTimerInterval);
+                recTimerInterval = null;
+            }
+
+            async function startRecording() {
+                if (isProcessingVoice) return;
+                try {
+                    if (!globalAudioStream || !globalAudioStream.active) {
+                        try {
+                            globalAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        } catch (mediaErr) {
+                            console.error('Failed to get media:', mediaErr);
+                            globalAudioStream = null;
+                            globalAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        }
+                    }
+                    
+                    const stream = globalAudioStream;
+                    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                        ? 'audio/webm;codecs=opus'
+                        : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
+                            ? 'audio/ogg;codecs=opus'
+                            : 'audio/webm';
+
+                    mediaRecorder = new MediaRecorder(stream, { mimeType });
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        // DO NOT stop the global tracks, keep them active for the next recording
+                        if (!isRecording) return; // cancelled
+                        
+                        isRecording = false; 
+                        isProcessingVoice = true;
+                        micBtn.style.opacity = '0.5';
+                        micBtn.style.pointerEvents = 'none';
+
+                        const blob = new Blob(audioChunks, { type: mimeType });
+                        try {
+                            await handleVoiceBlob(blob, mimeType, recSeconds);
+                        } finally {
+                            isProcessingVoice = false;
+                            micBtn.style.opacity = '1';
+                            micBtn.style.pointerEvents = 'auto';
+                        }
+                    };
+
+                    mediaRecorder.start(250); // collect in 250ms chunks
+                    isRecording = true;
+
+                    // Update UI
+                    micBtn.classList.add('recording');
+                    micBtn.querySelector('span').textContent = 'stop_circle';
+                    voiceRecordingBar.classList.add('active');
+                    chatInput.style.display = 'none';
+                    startRecTimer();
+                } catch (err) {
+                    console.error('Mic access denied:', err);
+                    alert('Microphone access is required for voice messages. Please allow it in your browser settings.');
+                }
+            }
+
+            function stopRecording(cancel = false) {
+                if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+                if (cancel) isRecording = false;
+                mediaRecorder.stop();
+
+                // Reset UI
+                micBtn.classList.remove('recording');
+                micBtn.querySelector('span').textContent = 'mic';
+                voiceRecordingBar.classList.remove('active');
+                chatInput.style.display = '';
+                stopRecTimer();
+            }
+
+            micBtn.addEventListener('click', () => {
+                if (isProcessingVoice) return;
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording(false); // stop and send
                 }
             });
+
+            cancelRecBtn.addEventListener('click', () => {
+                stopRecording(true); // cancel — discard
+            });
+
+            // ── Voice bubble helpers ────────────────────────────────────────
+            function appendUserVoiceBubble(audioBlob, durationSecs) {
+                const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const id = 'uv_' + Date.now();
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-end gap-2 sm:gap-3 justify-end ml-auto max-w-[90%] sm:max-w-[80%]';
+                wrapper.innerHTML = `
+                    <div class="bg-primary text-white rounded-2xl rounded-br-none shadow-md border border-primary overflow-hidden">
+                        <div class="voice-bubble">
+                            <button class="voice-play-btn" id="${id}_play" title="Play">
+                                <span class="material-symbols-outlined text-lg">play_arrow</span>
+                            </button>
+                            <div class="voice-waveform">
+                                <svg viewBox="0 0 120 28" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+                                    ${[4,8,14,10,18,12,7,15,9,6,13,11,16,8,5,12,10,14,6,9].map((h,i)=>
+                                        `<rect x="${i*6+1}" y="${(28-h)/2}" width="3" rx="1.5" height="${h}" fill="rgba(255,255,255,0.7)"/>`
+                                    ).join('')}
+                                </svg>
+                            </div>
+                            <span class="voice-duration text-white/80">${formatTime(durationSecs)}</span>
+                        </div>
+                        <div class="text-[10px] text-primary-soft opacity-80 font-medium pb-1 pr-4 text-right uppercase tracking-wide">${timeStr}</div>
+                    </div>
+                    <div class="size-7 sm:size-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mb-1">
+                        <span class="material-symbols-outlined text-base sm:text-lg text-slate-500">person</span>
+                    </div>`;
+
+                const audio = new Audio(audioUrl);
+                const playBtn = wrapper.querySelector(`#${id}_play span`);
+                audio.onended = () => { playBtn.textContent = 'play_arrow'; };
+                wrapper.querySelector(`#${id}_play`).addEventListener('click', () => {
+                    if (audio.paused) { audio.play(); playBtn.textContent = 'pause'; }
+                    else { audio.pause(); playBtn.textContent = 'play_arrow'; }
+                });
+
+                chatContainer.appendChild(wrapper);
+                scrollToBottom();
+            }
+
+            function appendAIVoiceBubble(audioBase64, transcript, durationHint = 0) {
+                const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase();
+                const id = 'aiv_' + Date.now();
+                const audioSrc = `data:audio/mp3;base64,${audioBase64}`;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex items-end gap-2 sm:gap-3 max-w-[90%] sm:max-w-[80%]';
+                wrapper.innerHTML = `
+                    <div class="size-7 sm:size-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0 mb-1">
+                        <span class="material-symbols-outlined text-base sm:text-lg">smart_toy</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden w-full min-w-[200px]">
+                        <div class="voice-bubble border-b border-slate-100 dark:border-slate-700">
+                            <button class="voice-play-btn" id="${id}_play" title="Play AI reply">
+                                <span class="material-symbols-outlined text-lg">play_arrow</span>
+                            </button>
+                            <div class="voice-waveform">
+                                <svg viewBox="0 0 120 28" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+                                    ${[5,9,13,8,16,11,6,14,9,5,12,10,15,7,4,11,9,13,5,8].map((h,i)=>
+                                        `<rect x="${i*6+1}" y="${(28-h)/2}" width="3" rx="1.5" height="${h}" fill="#0ea5e9"/>`
+                                    ).join('')}
+                                </svg>
+                            </div>
+                            <span class="voice-duration" id="${id}_dur">0:00</span>
+                        </div>
+                        <div class="message-content prose prose-sm prose-slate dark:prose-invert max-w-none pt-3 px-4 pb-1">
+                            ${marked.parse(transcript)}
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-medium pb-2 pr-4 text-right uppercase tracking-wide">${timeStr}</div>
+                    </div>`;
+
+                const audio = new Audio(audioSrc);
+                const playBtn  = wrapper.querySelector(`#${id}_play span`);
+                const durLabel = wrapper.querySelector(`#${id}_dur`);
+                audio.onloadedmetadata = () => { durLabel.textContent = formatTime(Math.round(audio.duration)); };
+                audio.onended = () => { playBtn.textContent = 'play_arrow'; };
+                wrapper.querySelector(`#${id}_play`).addEventListener('click', () => {
+                    if (audio.paused) { audio.play(); playBtn.textContent = 'pause'; }
+                    else { audio.pause(); playBtn.textContent = 'play_arrow'; }
+                });
+
+                chatContainer.appendChild(wrapper);
+                scrollToBottom();
+
+                // Auto-play AI voice reply
+                audio.play().catch(() => {});
+            }
+
+            // ── Main voice processing pipeline ──────────────────────────────
+            async function handleVoiceBlob(blob, mimeType, durationSecs) {
+                // 1. Show user's voice bubble immediately
+                appendUserVoiceBubble(blob, durationSecs);
+
+                // 2. Show typing indicator while processing
+                const aiContentContainer = createAIBubble();
+                aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Transcribing your voice...</span>`;
+
+                try {
+                    // 3. Convert blob → base64 (chunked to avoid stack overflow on large files)
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const uint8Array  = new Uint8Array(arrayBuffer);
+                    let binary = '';
+                    const CHUNK = 8192;
+                    for (let i = 0; i < uint8Array.length; i += CHUNK) {
+                        binary += String.fromCharCode(...uint8Array.subarray(i, i + CHUNK));
+                    }
+                    const audioBase64 = btoa(binary);
+
+                    // 4. Transcribe via Groq Whisper
+                    const sttRes  = await fetch('/api/transcribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ audioBase64, mimeType })
+                    });
+                    const sttData = await sttRes.json();
+                    const transcript = sttData.text?.trim() || '';
+
+                    if (!transcript) {
+                        aiContentContainer.innerHTML = `<span class="text-slate-500 italic text-sm">Couldn't understand the audio. Please try again.</span>`;
+                        return;
+                    }
+                    console.log('[Voice] Transcribed:', transcript);
+
+                    // 5. Update UI: show transcription under user bubble
+                    aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-pulse">psychology</span> Thinking...</span>`;
+
+                    // 6. Add to message history and get AI text response (stream)
+                    const enhancedTranscript = transcript + "\\n\\n(SYSTEM NOTE: Please reply in the EXACT SAME LANGUAGE the user spoke. Start your response with the 2-letter language code in brackets. Example: '[hi] नमस्ते!' or '[ta] வணக்கம்!' or '[te] నమస్కారం!' or '[en] Hello!')";
+                    messageHistory.push({ role: 'user', content: enhancedTranscript });
+                    if (isFirstMessageInSession) { isFirstMessageInSession = false; addRecentConsultation(transcript); }
+
+                    const chatRes = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: messageHistory, voiceMode: true })
+                    });
+
+                    // 7. Collect the full AI text response
+                    const reader  = chatRes.body.getReader();
+                    const decoder = new TextDecoder();
+                    let done = false, fullAIResponse = '', buffer = '';
+
+                    aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Generating audio reply...</span>`;
+
+                    while (!done) {
+                        const { value, done: rDone } = await reader.read();
+                        done = rDone;
+                        if (value) {
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+                            for (const line of lines) {
+                                if (line.startsWith('data: ')) {
+                                    const d = line.slice(6);
+                                    if (d === '[DONE]') { done = true; break; }
+                                    try {
+                                        const p = JSON.parse(d);
+                                        if (p.content) fullAIResponse += p.content;
+                                    } catch(_) {}
+                                }
+                            }
+                        }
+                    }
+
+                    // Strip language tag if present
+                    let responseLang = 'en';
+                    let displayAI = fullAIResponse;
+                    const langMatch = displayAI.match(/^\[([a-zA-Z-]+)\]/);
+                    if (langMatch) {
+                        responseLang = langMatch[1].toLowerCase();
+                        displayAI = displayAI.replace(/^\[[a-zA-Z-]+\]\s*/, '').trim();
+                    }
+
+                    // Strip suggestion markers
+                    if (displayAI.includes('|||SUGGESTIONS|||')) {
+                        const parts = displayAI.split('|||SUGGESTIONS|||');
+                        displayAI = parts[0];
+                        const suggestions = parts[1].split('|').map(s => s.trim()).filter(Boolean);
+                        renderSuggestions(suggestions);
+                    }
+
+                    // Remove the instruction suffix from history so it doesn't pollute context
+                    if (messageHistory.length > 0 && messageHistory[messageHistory.length - 1].role === 'user') {
+                        messageHistory[messageHistory.length - 1].content = transcript;
+                    }
+
+                    // Save clean text to history
+                    messageHistory.push({ role: 'assistant', content: displayAI.trim() });
+
+                    // 8. Convert AI reply to speech (TTS)
+                    const ttsRes  = await fetch('/api/tts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: displayAI.replace(/[*_`#~>|]/g, ''), lang: responseLang })
+                    });
+                    const ttsData = await ttsRes.json();
+
+                    if (ttsData.audioBase64) {
+                        // 9. Remove typing bubble and show AI voice bubble with transcript
+                        const bubbleWrapper = aiContentContainer.closest('[class*="flex"][class*="items-end"]') || aiContentContainer.parentElement?.parentElement;
+                        if (bubbleWrapper) bubbleWrapper.remove();
+                        appendAIVoiceBubble(ttsData.audioBase64, displayAI.trim());
+                    } else {
+                        // TTS failed — fall back to text reply
+                        aiContentContainer.innerHTML = marked.parse(displayAI);
+                    }
+
+                } catch (err) {
+                    console.error('[Voice Pipeline Error]', err);
+                    aiContentContainer.innerHTML = `<span class="text-red-500 text-sm">Voice processing failed. Please try again.</span>`;
+                }
+            }
 
             // Handle URL Parameters for contextual chat jumps
             const urlParams = new URLSearchParams(window.location.search);
             const topic = urlParams.get('topic');
             if (topic) {
-                // Pre-fill and send
                 chatInput.value = `Tell me about ${topic}`;
-                // Small delay to let UI settle before sending
                 setTimeout(() => {
                     sendMessage();
-                    // Clean up URL so refresh doesn't trigger it again
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }, 500);
             }
         });
+
 
         // ==========================================
         // Google Translate & Custom Translation Logic
