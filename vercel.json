@@ -10,7 +10,7 @@
             "use": "@vercel/static"
         },
         {
-            "src": "index.css",
+            "src": "style.css",
             "use": "@vercel/static"
         },
         {
@@ -19,13 +19,12 @@
         }
     ],
     "routes": [
-        {
-            "src": "/api/chat",
-            "dest": "server.js"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
-        }
+        { "src": "/api/chat",        "dest": "server.js" },
+        { "src": "/api/tts",         "dest": "server.js" },
+        { "src": "/api/transcribe",  "dest": "server.js" },
+        { "src": "/api/reminder",    "dest": "server.js" },
+        { "src": "/api/places",      "dest": "server.js" },
+        { "src": "/api/whatsapp",    "dest": "server.js" },
+        { "src": "/(.*)",            "dest": "/$1" }
     ]
 }

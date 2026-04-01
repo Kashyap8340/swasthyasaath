@@ -186,17 +186,15 @@ app.post('/api/transcribe', async (req, res) => {
 
 
 // ══════════════════════════════════════════════════════════════════════
-// Voice TTS: text → base64 MP3 via Google TTS
+// Voice TTS: text → base64 MP3
+// Strategy: edge-tts (local/server) → google-tts-api (Vercel fallback)
 // ══════════════════════════════════════════════════════════════════════
 app.post('/api/tts', async (req, res) => {
     try {
         const { text, lang = 'en' } = req.body;
         if (!text) return res.status(400).json({ error: 'text required' });
 
-        const safeText = text.replace(/[*_`#~>|]/g, '');
-        const id = Date.now() + Math.random().toString(36).substring(7);
-        const textFile = `temp_${id}.txt`;
-        const audioFile = `out_${id}.mp3`;
+        const safeText = text.replace(/[*_`#~>|]/g, '').slice(0, 3000);
 
         const voiceMap = {
             'en': 'en-IN-NeerjaNeural', 'hi': 'hi-IN-SwaraNeural',
@@ -207,17 +205,37 @@ app.post('/api/tts', async (req, res) => {
         };
         const voice = voiceMap[lang.toLowerCase()] || 'en-IN-NeerjaNeural';
 
+        // ── Attempt 1: edge-tts (needs Python, works locally & on servers) ──
         try {
+            const id = Date.now() + Math.random().toString(36).substring(7);
+            const textFile = `temp_${id}.txt`;
+            const audioFile = `out_${id}.mp3`;
             fs.writeFileSync(textFile, safeText, 'utf8');
-            await execPromise(`edge-tts -f ${textFile} --voice ${voice} --write-media ${audioFile}`);
+            await execPromise(`edge-tts -f "${textFile}" --voice ${voice} --write-media "${audioFile}"`);
             const base64Audio = fs.readFileSync(audioFile, { encoding: 'base64' });
-            return res.json({ audioBase64: base64Audio });
-        } finally {
             if (fs.existsSync(textFile)) fs.unlinkSync(textFile);
             if (fs.existsSync(audioFile)) fs.unlinkSync(audioFile);
+            console.log('[TTS] edge-tts succeeded');
+            return res.json({ audioBase64: base64Audio });
+        } catch (edgeErr) {
+            console.warn('[TTS] edge-tts failed, falling back to Google TTS:', edgeErr.message);
         }
+
+        // ── Attempt 2: google-tts-api (pure JS, always works on Vercel) ──
+        const langCodeMap = { 'en': 'en', 'hi': 'hi', 'ta': 'ta', 'te': 'te', 'bn': 'bn', 'gu': 'gu', 'mr': 'mr', 'ml': 'ml', 'kn': 'kn' };
+        const gttsLang = langCodeMap[lang.toLowerCase()] || 'en';
+
+        const urls = googleTTS.getAllAudioUrls(safeText, { lang: gttsLang, slow: false, splitPunct: ',.?!' });
+        const chunks = await Promise.all(urls.map(({ url }) =>
+            axios.get(url, { responseType: 'arraybuffer' }).then(r => Buffer.from(r.data))
+        ));
+        const merged = Buffer.concat(chunks);
+        const base64Audio = merged.toString('base64');
+        console.log('[TTS] google-tts fallback succeeded');
+        return res.json({ audioBase64: base64Audio });
+
     } catch (err) {
-        console.error('[TTS] Edge TTS error:', err.message);
+        console.error('[TTS] All TTS methods failed:', err.message);
         return res.status(500).json({ error: 'TTS failed' });
     }
 });
@@ -348,9 +366,11 @@ Use **bold** for section headings and keep it warm and easy to understand.`;
         await transporter.sendMail(mailOptions);
 
         // 2. Schedule the 15-minute advanced alert email
-        const alertTime = new Date(targetDateTime.getTime() - 15 * 60000); 
+        // Note: node-schedule only works on persistent servers (not Vercel serverless)
+        const alertTime = new Date(targetDateTime.getTime() - 15 * 60000);
+        const isVercel = process.env.VERCEL === '1';
         
-        if (alertTime > now) {
+        if (!isVercel && alertTime > now) {
             schedule.scheduleJob(alertTime, async () => {
                 const alertMailOptions = {
                     from: process.env.EMAIL_USER,
@@ -377,8 +397,10 @@ Use **bold** for section headings and keep it warm and easy to understand.`;
                 }
             });
             console.log(`[Reminder] Scheduled 15-min alert for ${name} at ${alertTime}`);
+        } else if (isVercel) {
+            console.log('[Reminder] Running on Vercel serverless — 15-min alert cannot be scheduled (stateless). Confirmation email sent.');
         } else {
-             console.log(`[Reminder] Target time is less than 15 mins away. Skipping 15-min alert.`);
+            console.log(`[Reminder] Target time is less than 15 mins away. Skipping 15-min alert.`);
         }
 
         return res.json({ success: true, message: 'Reminder set and immediate email sent!' });
