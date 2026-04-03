@@ -445,6 +445,41 @@ app.post('/api/chat', async (req, res) => {
         );
         console.log(`[Router] ${isMultimodal ? '🖼️  MULTIMODAL (image/voice)' : '💬 TEXT'} request received`);
 
+        // ── HELPER: stream Groq (OpenAI-compatible, Lightning Fast) ───────────
+        async function streamGroq(modelName) {
+            const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+            const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model: modelName, messages, stream: true })
+            });
+            if (!resp.ok) {
+                throw new Error(`Groq ${modelName} → HTTP ${resp.status}: ${await resp.text()}`);
+            }
+
+            const reader  = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let buf = '';
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buf += decoder.decode(value, { stream: true });
+                const lines = buf.split('\n');
+                buf = lines.pop();
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                        try {
+                            const parsed = JSON.parse(line.slice(6));
+                            const content = parsed.choices?.[0]?.delta?.content;
+                            if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                        } catch (_) {}
+                    }
+                }
+            }
+            res.write('data: [DONE]\n\n');
+            res.end();
+        }
+
         // ── HELPER: stream AgentRouter (OpenAI-compatible) ────────────────────
         async function streamAgentRouter(modelName) {
             const AR_KEY  = process.env.AGENTROUTER_API_KEY;
@@ -617,50 +652,60 @@ app.post('/api/chat', async (req, res) => {
 
         // ── PATH B: TEXT — priority chain ─────────────────────────────────────
 
-        // 1. Step-3.5-flash  (best standard text replies)
-        try {
-            console.log('[1/5] stepfun/step-3.5-flash:free  (OpenRouter)...');
-            const orRes = await connectOpenRouter('stepfun/step-3.5-flash:free', process.env.OPENROUTER_API_KEY);
-            console.log('✅ [1/5] step-3.5-flash responded!');
-            await pipeOpenRouter(orRes);
-            return;
-        } catch (err) { console.warn(`❌ [1/5] step-3.5-flash: ${err.message}`); }
-
-        // 2. AgentRouter — DeepSeek  (r1-0528 → v3.2 → v3.1)
-        for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
+        // 1. Groq (Llama 3.3 - Lightning Fast Primary)
+        for (const model of ['llama-3.3-70b-versatile', 'llama3-8b-8192']) {
             try {
-                console.log(`[2/5] AgentRouter / ${model}...`);
-                await streamAgentRouter(model);
-                console.log(`✅ [2/5] AgentRouter/${model} responded!`);
+                console.log(`[1/6] Groq ${model} (Lightning Fast)...`);
+                await streamGroq(model);
+                console.log(`✅ [1/6] Groq ${model} responded!`);
                 return;
-            } catch (err) { console.warn(`❌ [2/5] AgentRouter/${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [1/6] Groq ${model}: ${err.message}`); }
         }
 
-        // 3. Qwen
+        // 2. Step-3.5-flash  (best standard text replies)
         try {
-            console.log('[3/5] qwen/qwen3.6-plus-preview:free  (OpenRouter)...');
+            console.log('[2/6] stepfun/step-3.5-flash:free  (OpenRouter)...');
+            const orRes = await connectOpenRouter('stepfun/step-3.5-flash:free', process.env.OPENROUTER_API_KEY);
+            console.log('✅ [2/6] step-3.5-flash responded!');
+            await pipeOpenRouter(orRes);
+            return;
+        } catch (err) { console.warn(`❌ [2/6] step-3.5-flash: ${err.message}`); }
+
+        // 3. AgentRouter — DeepSeek  (r1-0528 → v3.2 → v3.1)
+        for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
+            try {
+                console.log(`[3/6] AgentRouter / ${model}...`);
+                await streamAgentRouter(model);
+                console.log(`✅ [3/6] AgentRouter/${model} responded!`);
+                return;
+            } catch (err) { console.warn(`❌ [3/6] AgentRouter/${model}: ${err.message}`); }
+        }
+
+        // 4. Qwen
+        try {
+            console.log('[4/6] qwen/qwen3.6-plus-preview:free  (OpenRouter)...');
             const orRes = await connectOpenRouter('qwen/qwen3.6-plus-preview:free', process.env.OPENROUTER_API_KEY_2);
-            console.log('✅ [3/5] Qwen responded!');
+            console.log('✅ [4/6] Qwen responded!');
             await pipeOpenRouter(orRes);
             return;
-        } catch (err) { console.warn(`❌ [3/5] Qwen: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [4/6] Qwen: ${err.message}`); }
 
-        // 4. Gemini direct  (text fallback — always agrees to plain text)
+        // 5. Gemini direct  (text fallback — always agrees to plain text)
         try {
-            console.log('[4/5] Gemini direct (text fallback)...');
+            console.log('[5/6] Gemini direct (text fallback)...');
             await streamGemini();
-            console.log('✅ [4/5] Gemini text fallback responded!');
+            console.log('✅ [5/6] Gemini text fallback responded!');
             return;
-        } catch (err) { console.warn(`❌ [4/5] Gemini: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [5/6] Gemini: ${err.message}`); }
 
-        // 5. Llama  (last resort)
+        // 6. Llama  (last resort)
         try {
-            console.log('[5/5] meta-llama/llama-4-maverick:free  (last resort)...');
+            console.log('[6/6] meta-llama/llama-4-maverick:free  (last resort)...');
             const orRes = await connectOpenRouter('meta-llama/llama-4-maverick:free', process.env.OPENROUTER_API_KEY);
-            console.log('✅ [5/5] Llama responded!');
+            console.log('✅ [6/6] Llama responded!');
             await pipeOpenRouter(orRes);
             return;
-        } catch (err) { console.warn(`❌ [5/5] Llama: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [6/6] Llama: ${err.message}`); }
 
         // All models exhausted
         res.write(`data: ${JSON.stringify({ error: 'All AI models are currently busy. Please try again in a moment.' })}\n\n`);
