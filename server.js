@@ -273,14 +273,14 @@ Use **bold** for section headings and keep it warm and easy to understand.`;
                 { role: 'user', content: userPrompt }
             ];
 
-            // 1. Step-3.5-flash (primary, same as chat)
+            // 1. Kimi-k2.6 (primary, same as chat)
             try {
                 const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-                    model: 'stepfun/step-3.5-flash:free', stream: false, messages
+                    model: 'moonshotai/kimi-k2.6:free', stream: false, messages
                 }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` } });
                 const text = r.data.choices?.[0]?.message?.content?.trim();
-                if (text) { console.log('[Reminder AI] step-3.5-flash responded'); return text; }
-            } catch (e) { console.warn('[Reminder AI] step-3.5-flash failed:', e.message); }
+                if (text) { console.log('[Reminder AI] Kimi-k2.6 responded'); return text; }
+            } catch (e) { console.warn('[Reminder AI] Kimi-k2.6 failed:', e.message); }
 
             // 2. Qwen (secondary, same as chat)
             try {
@@ -415,7 +415,7 @@ Use **bold** for section headings and keep it warm and easy to understand.`;
 // Chat Endpoint — Smart AI Routing
 // ══════════════════════════════════════════════════════════════════════
 //
-// TEXT priority:       1. Step-3.5-flash  2. AgentRouter DeepSeek
+// TEXT priority:       1. Kimi-k2.6       2. AgentRouter DeepSeek
 //                      3. Qwen            4. Gemini direct   5. Llama
 //
 // IMAGE / VOICE:       Gemini first (only multimodal model in chain)
@@ -662,14 +662,14 @@ app.post('/api/chat', async (req, res) => {
             } catch (err) { console.warn(`❌ [1/6] Groq ${model}: ${err.message}`); }
         }
 
-        // 2. Step-3.5-flash  (best standard text replies)
+        // 2. Kimi-k2.6 (best standard text replies)
         try {
-            console.log('[2/6] stepfun/step-3.5-flash:free  (OpenRouter)...');
-            const orRes = await connectOpenRouter('stepfun/step-3.5-flash:free', process.env.OPENROUTER_API_KEY);
-            console.log('✅ [2/6] step-3.5-flash responded!');
+            console.log('[2/6] moonshotai/kimi-k2.6:free  (OpenRouter)...');
+            const orRes = await connectOpenRouter('moonshotai/kimi-k2.6:free', process.env.OPENROUTER_API_KEY);
+            console.log('✅ [2/6] Kimi-k2.6 responded!');
             await pipeOpenRouter(orRes);
             return;
-        } catch (err) { console.warn(`❌ [2/6] step-3.5-flash: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [2/6] Kimi-k2.6: ${err.message}`); }
 
         // 3. AgentRouter — DeepSeek  (r1-0528 → v3.2 → v3.1)
         for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
@@ -731,7 +731,7 @@ app.post('/api/whatsapp', async (req, res) => {
         }
 
         const postData = JSON.stringify({
-            model: "stepfun/step-3.5-flash:free",
+            model: "moonshotai/kimi-k2.6:free",
             messages: [{ role: "user", content: incomingMsg }],
             stream: false
         });

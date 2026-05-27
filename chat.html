@@ -157,6 +157,117 @@
             font-size: 11px; color: #64748b; font-style: italic;
             margin-top: 4px; padding: 0 14px 6px;
         }
+
+        /* ── Image Upload UI ──────────────────────────────── */
+        #imagePreviewStrip {
+            display: none;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 8px 0 4px;
+            animation: slideUp 0.25s ease;
+        }
+        #imagePreviewStrip.active { display: flex; }
+
+        .img-preview-item {
+            position: relative;
+            width: 72px; height: 72px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #0ea5e9;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(14,165,233,0.25);
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
+
+        .img-preview-item img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .img-preview-remove {
+            position: absolute; top: 2px; right: 2px;
+            width: 18px; height: 18px;
+            background: rgba(0,0,0,0.65);
+            border: none; border-radius: 50%;
+            color: #fff; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; line-height: 1;
+            transition: background 0.15s;
+        }
+        .img-preview-remove:hover { background: #ef4444; }
+
+        .img-preview-badge {
+            position: absolute; bottom: 2px; left: 0; right: 0;
+            text-align: center;
+            font-size: 9px; font-weight: 700;
+            color: #fff;
+            background: rgba(14,165,233,0.85);
+            padding: 1px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Upload button */
+        #imageUploadBtn {
+            color: #94a3b8;
+            background: none; border: none;
+            padding: 4px; cursor: pointer;
+            border-radius: 50%;
+            transition: color 0.2s, background 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #imageUploadBtn:hover { color: #0ea5e9; background: rgba(14,165,233,0.08); }
+
+        /* Image in chat bubbles */
+        .chat-image {
+            max-width: 240px; max-height: 200px;
+            border-radius: 10px;
+            object-fit: contain;
+            margin-bottom: 6px;
+            display: block;
+            cursor: zoom-in;
+            transition: opacity 0.2s;
+        }
+        .chat-image:hover { opacity: 0.9; }
+
+        /* Lightbox */
+        #imgLightbox {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            align-items: center; justify-content: center;
+            cursor: zoom-out;
+        }
+        #imgLightbox.active { display: flex; }
+        #imgLightbox img {
+            max-width: 90vw; max-height: 88vh;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+            animation: fadeIn 0.2s ease;
+        }
+        #imgLightboxClose {
+            position: fixed; top: 18px; right: 22px;
+            background: rgba(255,255,255,0.15);
+            border: none; border-radius: 50%;
+            width: 38px; height: 38px;
+            color: #fff; font-size: 22px;
+            cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        #imgLightboxClose:hover { background: rgba(255,255,255,0.3); }
+
+        /* Analysing badge */
+        .analysing-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 11px; font-weight: 600;
+            color: #7c3aed;
+            background: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            padding: 3px 9px; border-radius: 20px;
+            margin-bottom: 6px;
+        }
+        .dark .analysing-badge { background: #2e1065; border-color: #4c1d95; color: #c4b5fd; }
     </style>
 </head>
 
@@ -367,6 +478,9 @@
                             Nearby health centers?
                         </button>
                     </div>
+                    <!-- Image preview strip (shown when images are queued) -->
+                    <div id="imagePreviewStrip"></div>
+
                     <!-- WhatsApp-style recording bar (shown while recording) -->
                     <div id="voiceRecordingBar">
                         <div class="rec-dot"></div>
@@ -380,10 +494,16 @@
                         </button>
                     </div>
                     <div class="relative flex items-center gap-2 sm:gap-3">
+                        <!-- Hidden file input -->
+                        <input type="file" id="imageFileInput" accept="image/*" multiple style="display:none" />
+                        <!-- Image upload button -->
+                        <button id="imageUploadBtn" title="Upload image for AI analysis">
+                            <span class="material-symbols-outlined text-[22px]">add_photo_alternate</span>
+                        </button>
                     <div class="relative flex-1">
                             <input id="chatInput"
                                 class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-3.5 sm:py-4 pl-5 sm:pl-6 pr-12 sm:pr-14 text-sm sm:text-base focus:ring-2 focus:ring-primary/50 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                                placeholder="Ask a health question..." type="text" />
+                                placeholder="Ask a health question or upload an image..." type="text" />
                             <!-- Mic button: tap to start/stop recording -->
                             <button id="micBtn"
                                 title="Hold to record voice message"
@@ -408,6 +528,13 @@
             </footer>
         </main>
     </div>
+
+    <!-- Lightbox for full-size image view -->
+    <div id="imgLightbox">
+        <button id="imgLightboxClose"><span class="material-symbols-outlined">close</span></button>
+        <img id="imgLightboxImg" src="" alt="Full size image" />
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const chatInput = document.getElementById('chatInput');
@@ -423,11 +550,91 @@
 
             const SYSTEM_PROMPT = {
                 role: "system",
-                content: "You are SwasthyaSaathi AI, a helpful and reliable health assistant. Your goal is to provide general healthcare awareness, information on diseases, and prevention techniques. Explain everything in VERY SIMPLE, easy-to-understand language. Do not use complex medical jargon. Do not provide medical diagnosis. If a user presents severe symptoms, always advise them to seek immediate medical help or call emergency services like 108. CRITICAL: You must ONLY answer questions related to health, medical conditions, wellness, or the SwasthyaSaathi app. If a user asks something unrelated (e.g., coding, math, general trivia, politics), politely refuse to answer and remind them you are a health assistant. Format your responses using markdown. Use bullet points for lists, short paragraphs for readability, and bold text to emphasize important information or key terms. IMPORTANT INSTRUCTION: At the very end of EVERY response, you MUST provide exactly 3 short follow-up questions the user could ask next. Prefix this section exactly with '|||SUGGESTIONS|||' followed by the questions separated by '|'. Example: |||SUGGESTIONS|||What is Dengue?|How to prevent malaria?|Nearest hospital?"
+                content: "You are SwasthyaSaathi AI, a helpful and reliable health assistant. Your goal is to provide general healthcare awareness, information on diseases, and prevention techniques. Explain everything in VERY SIMPLE, easy-to-understand language. Do not use complex medical jargon. Do not provide medical diagnosis. If a user presents severe symptoms, always advise them to seek immediate medical help or call emergency services like 108. CRITICAL: You must ONLY answer questions related to health, medical conditions, wellness, or the SwasthyaSaathi app. If a user asks something unrelated (e.g., coding, math, general trivia, politics), politely refuse to answer and remind them you are a health assistant. FORMAT: Use markdown — bullet points, short paragraphs, bold key terms. IMAGE ANALYSIS: When the user uploads an image (medical report, prescription, X-ray, skin condition, rash, eye, wound, or any health-related photo), carefully analyse it and provide: 1) What you observe in the image, 2) Possible health implications in simple language, 3) Whether immediate medical attention is advised. Always clarify you are an AI assistant and cannot replace a licensed doctor. IMPORTANT INSTRUCTION: At the very end of EVERY response, you MUST provide exactly 3 short follow-up questions the user could ask next. Prefix this section exactly with '|||SUGGESTIONS|||' followed by the questions separated by '|'. Example: |||SUGGESTIONS|||What is Dengue?|How to prevent malaria?|Nearest hospital?"
             };
 
             let messageHistory = [SYSTEM_PROMPT];
             let isFirstMessageInSession = true;
+
+            // ── Image Upload State ────────────────────────────────────────
+            let pendingImages = []; // [{dataUrl, mimeType, name}]
+
+            const imageFileInput      = document.getElementById('imageFileInput');
+            const imageUploadBtn      = document.getElementById('imageUploadBtn');
+            const imagePreviewStrip   = document.getElementById('imagePreviewStrip');
+            const imgLightbox         = document.getElementById('imgLightbox');
+            const imgLightboxImg      = document.getElementById('imgLightboxImg');
+            const imgLightboxClose    = document.getElementById('imgLightboxClose');
+
+            // Open file picker
+            imageUploadBtn.addEventListener('click', () => imageFileInput.click());
+
+            // Handle file selection
+            imageFileInput.addEventListener('change', async (e) => {
+                const files = Array.from(e.target.files);
+                if (!files.length) return;
+
+                for (const file of files) {
+                    if (!file.type.startsWith('image/')) continue;
+                    if (pendingImages.length >= 4) {
+                        alert('You can attach up to 4 images at once.');
+                        break;
+                    }
+                    const dataUrl = await fileToDataUrl(file);
+                    pendingImages.push({ dataUrl, mimeType: file.type, name: file.name });
+                }
+
+                renderImagePreviews();
+                // Reset input so the same file can be re-selected
+                imageFileInput.value = '';
+            });
+
+            function fileToDataUrl(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function renderImagePreviews() {
+                imagePreviewStrip.innerHTML = '';
+                if (pendingImages.length === 0) {
+                    imagePreviewStrip.classList.remove('active');
+                    return;
+                }
+                imagePreviewStrip.classList.add('active');
+
+                pendingImages.forEach((img, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'img-preview-item';
+                    item.innerHTML = `
+                        <img src="${img.dataUrl}" alt="Preview" />
+                        <button class="img-preview-remove" data-idx="${idx}" title="Remove">✕</button>
+                        <div class="img-preview-badge">Image</div>
+                    `;
+                    imagePreviewStrip.appendChild(item);
+                });
+
+                // Bind remove buttons
+                imagePreviewStrip.querySelectorAll('.img-preview-remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const idx = parseInt(btn.dataset.idx);
+                        pendingImages.splice(idx, 1);
+                        renderImagePreviews();
+                    });
+                });
+            }
+
+            // Lightbox
+            function openLightbox(src) {
+                imgLightboxImg.src = src;
+                imgLightbox.classList.add('active');
+            }
+            imgLightbox.addEventListener('click', () => imgLightbox.classList.remove('active'));
+            imgLightboxClose.addEventListener('click', () => imgLightbox.classList.remove('active'));
 
             function scrollToBottom() {
                 chatContainer.scrollTo({
@@ -436,21 +643,43 @@
                 });
             }
 
-            function appendUserMessage(text) {
+            function appendUserMessage(text, images = []) {
                 const timeRaw = new Date();
                 const timeStr = timeRaw.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).toUpperCase();
+
+                // Build image HTML
+                const imagesHTML = images.map(img => `
+                    <img src="${img.dataUrl}" alt="Uploaded image" class="chat-image" />
+                `).join('');
+
+                const analysingBadge = images.length > 0 ? `
+                    <div class="analysing-badge">
+                        <span class="material-symbols-outlined" style="font-size:13px">biotech</span>
+                        AI will analyse ${images.length === 1 ? 'this image' : 'these images'}
+                    </div>` : '';
 
                 const msgHTML = `
             <div class="flex items-end gap-2 sm:gap-3 justify-end ml-auto max-w-[90%] sm:max-w-[80%]">
                 <div class="bg-primary text-white p-4 sm:p-5 rounded-2xl rounded-br-none shadow-md border border-primary">
-                    <p class="text-sm sm:text-base leading-relaxed">` + text + `</p>
-                    <span class="text-[10px] text-primary-soft opacity-80 font-medium block mt-2 text-right uppercase tracking-wide">` + timeStr + `</span>
+                    ${analysingBadge}
+                    ${imagesHTML}
+                    ${text ? `<p class="text-sm sm:text-base leading-relaxed">${text}</p>` : ''}
+                    <span class="text-[10px] text-primary-soft opacity-80 font-medium block mt-2 text-right uppercase tracking-wide">${timeStr}</span>
                 </div>
                 <div class="size-7 sm:size-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 mb-1">
                     <span class="material-symbols-outlined text-base sm:text-lg text-slate-500">person</span>
                 </div>
             </div>`;
                 chatContainer.insertAdjacentHTML('beforeend', msgHTML);
+
+                // Bind lightbox to newly added images
+                chatContainer.querySelectorAll('.chat-image').forEach(img => {
+                    if (!img.dataset.lightboxBound) {
+                        img.dataset.lightboxBound = '1';
+                        img.addEventListener('click', () => openLightbox(img.src));
+                    }
+                });
+
                 scrollToBottom();
             }
 
@@ -487,11 +716,17 @@
 
             async function sendMessage() {
                 const text = chatInput.value.trim();
-                if (!text) return;
+                const hasImages = pendingImages.length > 0;
+                if (!text && !hasImages) return;
+
+                // Capture images and clear state BEFORE any async work
+                const imagesToSend = [...pendingImages];
+                pendingImages = [];
+                renderImagePreviews();
 
                 // Immediately clear input and show user message
                 chatInput.value = '';
-                appendUserMessage(text);
+                appendUserMessage(text, imagesToSend);
 
                 // Handle History extraction on first query of the session
                 if (isFirstMessageInSession) {
@@ -540,8 +775,19 @@
                     aiContentContainer.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
                 }
 
-                // Add user message to history
-                messageHistory.push({ role: "user", content: contextualizedText });
+                // Build user message — multipart if images are attached
+                let userHistoryMsg;
+                if (imagesToSend.length > 0) {
+                    const parts = [];
+                    if (contextualizedText) parts.push({ type: 'text', text: contextualizedText });
+                    imagesToSend.forEach(img => {
+                        parts.push({ type: 'image_url', image_url: { url: img.dataUrl } });
+                    });
+                    userHistoryMsg = { role: 'user', content: parts };
+                } else {
+                    userHistoryMsg = { role: 'user', content: contextualizedText };
+                }
+                messageHistory.push(userHistoryMsg);
 
                 try {
                     // Send the POST request to our Express server
@@ -623,7 +869,20 @@
                     }
 
                     // Add Assistant response to history for context (only the visible part)
+                    // Store as plain text string regardless of whether user sent images
                     messageHistory.push({ role: "assistant", content: finalDisplayContent });
+
+                    // Show image analysis indicator if images were sent
+                    if (imagesToSend.length > 0) {
+                        const analysedNote = aiContentContainer.querySelector('.img-analysis-note');
+                        if (!analysedNote) {
+                            const note = document.createElement('div');
+                            note.className = 'analysing-badge img-analysis-note mt-3';
+                            note.style.cssText = 'color:#059669;background:#ecfdf5;border-color:#a7f3d0;';
+                            note.innerHTML = '<span class="material-symbols-outlined" style="font-size:13px">check_circle</span> Image analysed by Gemini Vision';
+                            aiContentContainer.appendChild(note);
+                        }
+                    }
 
                 } catch (error) {
                     console.error("Chat Error:", error);
