@@ -137,10 +137,13 @@ client.on('message', async (message) => {
 // Helper function to talk to OpenRouter completely exactly like Vercel backend
 function getAIResponse(historyRef, userMessage, isVoice = false) {
     return new Promise((resolve, reject) => {
-        let systemPrompt = "You are SwasthyaSaathi AI, a friendly, warm, and natural health assistant. Always use emojis. Talk like a friendly human on WhatsApp. IMPORTANT: You MUST reply in the EXACT SAME LANGUAGE the user messages you in (e.g. Hindi, English, Tamil, etc).";
+        let systemPrompt = "You are SwasthyaSaathi AI, a deeply empathetic, warm, and highly caring health assistant. Always use emojis. Talk like a friendly, comforting human on WhatsApp. " +
+            "If the user mentions any pain, symptom, or discomfort, you MUST start your response with a compassionate and caring message, expressing genuine concern (e.g., 'Oh, I am so sorry to hear you are feeling unwell! Please take rest and take care of yourself. 🤗'). " +
+            "Provide detailed, comforting, and informative replies rather than short or cold answers. Keep the tone reassuring, gentle, and highly supportive. " +
+            "IMPORTANT: You MUST reply in the EXACT SAME LANGUAGE the user messages you in (e.g. Hindi, English, Tamil, etc).";
         
         if (isVoice) {
-            systemPrompt += " Since the user sent a voice message, YOUR text will be converted to speech. Keep your responses conversational and natural. ALSO: You MUST start your response with the 2-letter Google Translate language code in brackets. Example: '[hi] नमस्ते!' or '[ta] வணக்கம்!' or '[te] నమస్కారం!' or '[en] Hello!'";
+            systemPrompt += " Since the user sent a voice message, YOUR text will be converted to speech. Keep your responses conversational, warm, and natural. ALSO: You MUST start your response with the 2-letter Google Translate language code in brackets. Example: '[hi] नमस्ते!' or '[ta] வணக்கம்!' or '[te] నమస్కారం!' or '[en] Hello!'";
         }
 
         // Push current message to memory
