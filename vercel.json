@@ -1,30 +1,8 @@
 {
-    "version": 2,
-    "builds": [
+    "rewrites": [
         {
-            "src": "server.js",
-            "use": "@vercel/node"
-        },
-        {
-            "src": "*.html",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "style.css",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "logo.png",
-            "use": "@vercel/static"
+            "source": "/api/(.*)",
+            "destination": "/server.js"
         }
-    ],
-    "routes": [
-        { "src": "/api/chat",        "dest": "server.js" },
-        { "src": "/api/tts",         "dest": "server.js" },
-        { "src": "/api/transcribe",  "dest": "server.js" },
-        { "src": "/api/reminder",    "dest": "server.js" },
-        { "src": "/api/places",      "dest": "server.js" },
-        { "src": "/api/whatsapp",    "dest": "server.js" },
-        { "src": "/(.*)",            "dest": "/$1" }
     ]
 }
