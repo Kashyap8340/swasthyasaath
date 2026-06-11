@@ -151,7 +151,7 @@ function getAIResponse(historyRef, userMessage, isVoice = false) {
         if (historyRef.length > MAX_HISTORY) historyRef.splice(0, historyRef.length - MAX_HISTORY);
 
         const postData = JSON.stringify({
-            model: "moonshotai/kimi-k2.6:free",
+            model: "google/gemma-4-31b-it:free",
             messages: [
                 { role: "system", content: systemPrompt },
                 ...historyRef

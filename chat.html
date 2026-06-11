@@ -51,13 +51,31 @@
             animation: typing 1.4s infinite ease-in-out both;
         }
 
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        .typing-dot:nth-child(3) { animation-delay: 0s; }
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0s;
+        }
 
         @keyframes typing {
-            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-            40% { transform: scale(1); opacity: 1; }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.6);
+                opacity: 0.4;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         /* ── Voice Recording UI ──────────────────────────────── */
@@ -71,91 +89,222 @@
             color: white;
             animation: slideUp 0.3s ease;
         }
-        #voiceRecordingBar.active { display: flex; }
+
+        #voiceRecordingBar.active {
+            display: flex;
+        }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .rec-dot {
-            width: 10px; height: 10px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #ff4444;
             animation: recPulse 1s infinite;
             flex-shrink: 0;
         }
+
         @keyframes recPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.4; transform: scale(0.7); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.7);
+            }
         }
 
-        #recTimer { font-size: 13px; font-weight: 700; letter-spacing: 1px; min-width: 40px; }
+        #recTimer {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            min-width: 40px;
+        }
 
         .waveform {
-            display: flex; align-items: center; gap: 3px; flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex: 1;
         }
+
         .waveform span {
             display: inline-block;
-            width: 3px; border-radius: 3px;
-            background: rgba(255,255,255,0.8);
+            width: 3px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.8);
             animation: wave 0.8s infinite ease-in-out;
         }
-        .waveform span:nth-child(1)  { animation-delay: 0.0s; height: 6px; }
-        .waveform span:nth-child(2)  { animation-delay: 0.1s; height: 14px; }
-        .waveform span:nth-child(3)  { animation-delay: 0.2s; height: 10px; }
-        .waveform span:nth-child(4)  { animation-delay: 0.1s; height: 18px; }
-        .waveform span:nth-child(5)  { animation-delay: 0.3s; height: 8px; }
-        .waveform span:nth-child(6)  { animation-delay: 0.2s; height: 14px; }
-        .waveform span:nth-child(7)  { animation-delay: 0.0s; height: 6px; }
-        .waveform span:nth-child(8)  { animation-delay: 0.15s; height: 12px; }
-        .waveform span:nth-child(9)  { animation-delay: 0.25s; height: 10px; }
-        .waveform span:nth-child(10) { animation-delay: 0.1s; height: 16px; }
+
+        .waveform span:nth-child(1) {
+            animation-delay: 0.0s;
+            height: 6px;
+        }
+
+        .waveform span:nth-child(2) {
+            animation-delay: 0.1s;
+            height: 14px;
+        }
+
+        .waveform span:nth-child(3) {
+            animation-delay: 0.2s;
+            height: 10px;
+        }
+
+        .waveform span:nth-child(4) {
+            animation-delay: 0.1s;
+            height: 18px;
+        }
+
+        .waveform span:nth-child(5) {
+            animation-delay: 0.3s;
+            height: 8px;
+        }
+
+        .waveform span:nth-child(6) {
+            animation-delay: 0.2s;
+            height: 14px;
+        }
+
+        .waveform span:nth-child(7) {
+            animation-delay: 0.0s;
+            height: 6px;
+        }
+
+        .waveform span:nth-child(8) {
+            animation-delay: 0.15s;
+            height: 12px;
+        }
+
+        .waveform span:nth-child(9) {
+            animation-delay: 0.25s;
+            height: 10px;
+        }
+
+        .waveform span:nth-child(10) {
+            animation-delay: 0.1s;
+            height: 16px;
+        }
+
         @keyframes wave {
-            0%, 100% { transform: scaleY(0.5); opacity: 0.7; }
-            50%       { transform: scaleY(1.4); opacity: 1; }
+
+            0%,
+            100% {
+                transform: scaleY(0.5);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scaleY(1.4);
+                opacity: 1;
+            }
         }
 
         #cancelRecBtn {
-            background: rgba(255,255,255,0.2);
-            border: none; border-radius: 50%;
-            width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: white; flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            flex-shrink: 0;
             transition: background 0.2s;
         }
-        #cancelRecBtn:hover { background: rgba(255,255,255,0.35); }
+
+        #cancelRecBtn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
 
         /* Mic button — active while recording */
         #micBtn.recording {
             background: #ef4444 !important;
             animation: micPulse 1s infinite;
         }
+
         @keyframes micPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
-            50%       { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
         }
 
         /* Voice message bubble */
         .voice-bubble {
-            display: flex; align-items: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             padding: 8px 14px;
             min-width: 220px;
         }
+
         .voice-play-btn {
-            width: 36px; height: 36px; border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             background: #0ea5e9;
-            border: none; color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; transition: background 0.2s, transform 0.1s;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s, transform 0.1s;
         }
-        .voice-play-btn:hover { background: #0284c7; transform: scale(1.05); }
-        .voice-waveform { flex: 1; height: 28px; position: relative; }
-        .voice-waveform canvas { width: 100%; height: 100%; }
-        .voice-duration { font-size: 11px; color: #64748b; font-weight: 600; min-width: 30px; }
+
+        .voice-play-btn:hover {
+            background: #0284c7;
+            transform: scale(1.05);
+        }
+
+        .voice-waveform {
+            flex: 1;
+            height: 28px;
+            position: relative;
+        }
+
+        .voice-waveform canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .voice-duration {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            min-width: 30px;
+        }
+
         .voice-transcription {
-            font-size: 11px; color: #64748b; font-style: italic;
-            margin-top: 4px; padding: 0 14px 6px;
+            font-size: 11px;
+            color: #64748b;
+            font-style: italic;
+            margin-top: 4px;
+            padding: 0 14px 6px;
         }
 
         /* ── Image Upload UI ──────────────────────────────── */
@@ -166,41 +315,74 @@
             padding: 8px 0 4px;
             animation: slideUp 0.25s ease;
         }
-        #imagePreviewStrip.active { display: flex; }
+
+        #imagePreviewStrip.active {
+            display: flex;
+        }
 
         .img-preview-item {
             position: relative;
-            width: 72px; height: 72px;
+            width: 72px;
+            height: 72px;
             border-radius: 12px;
             overflow: hidden;
             border: 2px solid #0ea5e9;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(14,165,233,0.25);
+            box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
             animation: fadeIn 0.2s ease;
         }
-        @keyframes fadeIn { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
         .img-preview-item img {
-            width: 100%; height: 100%; object-fit: cover;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
+
         .img-preview-remove {
-            position: absolute; top: 2px; right: 2px;
-            width: 18px; height: 18px;
-            background: rgba(0,0,0,0.65);
-            border: none; border-radius: 50%;
-            color: #fff; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; line-height: 1;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 0, 0, 0.65);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            line-height: 1;
             transition: background 0.15s;
         }
-        .img-preview-remove:hover { background: #ef4444; }
+
+        .img-preview-remove:hover {
+            background: #ef4444;
+        }
 
         .img-preview-badge {
-            position: absolute; bottom: 2px; left: 0; right: 0;
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
             text-align: center;
-            font-size: 9px; font-weight: 700;
+            font-size: 9px;
+            font-weight: 700;
             color: #fff;
-            background: rgba(14,165,233,0.85);
+            background: rgba(14, 165, 233, 0.85);
             padding: 1px 0;
             letter-spacing: 0.5px;
             text-transform: uppercase;
@@ -209,17 +391,26 @@
         /* Upload button */
         #imageUploadBtn {
             color: #94a3b8;
-            background: none; border: none;
-            padding: 4px; cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
             border-radius: 50%;
             transition: color 0.2s, background 0.2s;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #imageUploadBtn:hover { color: #0ea5e9; background: rgba(14,165,233,0.08); }
+
+        #imageUploadBtn:hover {
+            color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.08);
+        }
 
         /* Image in chat bubbles */
         .chat-image {
-            max-width: 240px; max-height: 200px;
+            max-width: 240px;
+            max-height: 200px;
             border-radius: 10px;
             object-fit: contain;
             margin-bottom: 6px;
@@ -227,47 +418,271 @@
             cursor: zoom-in;
             transition: opacity 0.2s;
         }
-        .chat-image:hover { opacity: 0.9; }
+
+        .chat-image:hover {
+            opacity: 0.9;
+        }
 
         /* Lightbox */
         #imgLightbox {
             display: none;
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.85);
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
             z-index: 999;
-            align-items: center; justify-content: center;
+            align-items: center;
+            justify-content: center;
             cursor: zoom-out;
         }
-        #imgLightbox.active { display: flex; }
+
+        #imgLightbox.active {
+            display: flex;
+        }
+
         #imgLightbox img {
-            max-width: 90vw; max-height: 88vh;
+            max-width: 90vw;
+            max-height: 88vh;
             border-radius: 12px;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
             animation: fadeIn 0.2s ease;
         }
+
         #imgLightboxClose {
-            position: fixed; top: 18px; right: 22px;
-            background: rgba(255,255,255,0.15);
-            border: none; border-radius: 50%;
-            width: 38px; height: 38px;
-            color: #fff; font-size: 22px;
-            cursor: pointer; display: flex;
-            align-items: center; justify-content: center;
+            position: fixed;
+            top: 18px;
+            right: 22px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.2s;
         }
-        #imgLightboxClose:hover { background: rgba(255,255,255,0.3); }
+
+        #imgLightboxClose:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
         /* Analysing badge */
         .analysing-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 11px; font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
             color: #7c3aed;
             background: #f5f3ff;
             border: 1px solid #ddd6fe;
-            padding: 3px 9px; border-radius: 20px;
+            padding: 3px 9px;
+            border-radius: 20px;
             margin-bottom: 6px;
         }
-        .dark .analysing-badge { background: #2e1065; border-color: #4c1d95; color: #c4b5fd; }
+
+        .dark .analysing-badge {
+            background: #2e1065;
+            border-color: #4c1d95;
+            color: #c4b5fd;
+        }
+
+        /* ── AI Response Typography ─────────────────────────── */
+        .message-content h2,
+        .message-content h3 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            margin: 14px 0 6px 0;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #f0f9ff;
+            border-left: 3px solid #0ea5e9;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .message-content h2:first-child,
+        .message-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .dark .message-content h2,
+        .dark .message-content h3 {
+            background: rgba(14, 165, 233, 0.08);
+            border-left-color: #38bdf8;
+            color: #7dd3fc;
+        }
+
+        .message-content p {
+            margin: 4px 0;
+            line-height: 1.6;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        .dark .message-content p {
+            color: #cbd5e1;
+        }
+
+        .message-content ul,
+        .message-content ol {
+            margin: 4px 0 8px 0;
+            padding-left: 18px;
+        }
+
+        .message-content li {
+            font-size: 13px;
+            line-height: 1.55;
+            margin-bottom: 3px;
+            color: #475569;
+        }
+
+        .dark .message-content li {
+            color: #94a3b8;
+        }
+
+        .message-content li::marker {
+            color: #0ea5e9;
+        }
+
+        .message-content strong {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .dark .message-content strong {
+            color: #f1f5f9;
+        }
+
+        .message-content blockquote {
+            border-left: 3px solid #f59e0b;
+            background: #fffbeb;
+            padding: 6px 12px;
+            margin: 8px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 12px;
+            color: #92400e;
+        }
+
+        .dark .message-content blockquote {
+            background: rgba(245, 158, 11, 0.08);
+            border-left-color: #fbbf24;
+            color: #fcd34d;
+        }
+
+        /* ── Detail Action Buttons (Know More) ─────────────── */
+        .detail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(148, 163, 184, 0.25);
+        }
+
+        .detail-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px 7px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #475569;
+            font-size: 11.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .detail-action-btn:hover {
+            border-color: #93c5fd;
+            color: #0369a1;
+            background: #f0f9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(14, 165, 233, 0.12);
+        }
+
+        .detail-action-btn .da-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .detail-action-btn .da-icon .material-symbols-outlined {
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .da-icon-blue { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+        .da-icon-green { background: linear-gradient(135deg, #10b981, #059669); }
+        .da-icon-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .da-icon-orange { background: linear-gradient(135deg, #f59e0b, #ea580c); }
+
+        .dark .detail-action-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        .dark .detail-action-btn:hover {
+            background: #0f172a;
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        /* ── Suggestion Pills (Footer) ─────────────────────── */
+        .suggestion-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        .suggestion-btn:hover {
+            background: #f0f9ff;
+            border-color: #0ea5e9;
+            color: #0369a1;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(14, 165, 233, 0.1);
+        }
+
+        .suggestion-btn .material-symbols-outlined {
+            font-size: 14px;
+            color: #0ea5e9;
+        }
+
+        .dark .suggestion-btn {
+            background: #1e293b;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        .dark .suggestion-btn:hover {
+            background: #0f172a;
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
     </style>
 </head>
 
@@ -353,19 +768,13 @@
                                     Locate Center</p>
                             </div>
                         </div>
-                        <div class="w-full aspect-video rounded-lg overflow-hidden relative mb-2 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div
+                            class="w-full aspect-video rounded-lg overflow-hidden relative mb-2 shadow-sm border border-slate-200 dark:border-slate-700">
                             <!-- Live Google Maps Snippet querying for nearest doctors -->
-                            <iframe 
-                                title="Nearest Healthcare Providers"
-                                src="https://maps.google.com/maps?q=nearest+doctor+clinic+hospital&t=&z=13&ie=UTF8&iwloc=&output=embed" 
-                                width="100%" 
-                                height="100%" 
-                                frameborder="0" 
-                                style="border:0;" 
-                                allowfullscreen="" 
-                                loading="lazy" 
-                                aria-hidden="false" 
-                                tabindex="0">
+                            <iframe title="Nearest Healthcare Providers"
+                                src="https://maps.google.com/maps?q=nearest+doctor+clinic+hospital&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen=""
+                                loading="lazy" aria-hidden="false" tabindex="0">
                             </iframe>
                         </div>
                         <button
@@ -426,6 +835,10 @@
                         <button id="lang-or"
                             class="px-1.5 sm:px-3 py-1 text-[9px] sm:text-xs font-bold rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50 transition-all">ଓଡ଼ିଆ</button>
                     </div>
+                    <button id="callAiBtn" title="Real-time Call"
+                        class="p-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors flex items-center justify-center mr-1">
+                        <span class="material-symbols-outlined text-xl">call</span>
+                    </button>
                     <button
                         class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hidden sm:block">
                         <span class="material-symbols-outlined text-xl">settings</span>
@@ -465,16 +878,16 @@
                 <div class="max-w-4xl mx-auto space-y-4">
                     <!-- Suggested Pills -->
                     <div id="suggestedPillsContainer" class="flex flex-wrap gap-2 justify-center">
-                        <button
-                            class="suggestion-btn px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary rounded-full text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-700">
+                        <button class="suggestion-btn">
+                            <span class="material-symbols-outlined">chat_bubble_outline</span>
                             How can I prevent viral fever?
                         </button>
-                        <button
-                            class="suggestion-btn px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary rounded-full text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-700">
+                        <button class="suggestion-btn">
+                            <span class="material-symbols-outlined">vaccines</span>
                             Polio vaccination schedule?
                         </button>
-                        <button
-                            class="suggestion-btn px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary rounded-full text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-700">
+                        <button class="suggestion-btn">
+                            <span class="material-symbols-outlined">location_on</span>
                             Nearby health centers?
                         </button>
                     </div>
@@ -500,13 +913,12 @@
                         <button id="imageUploadBtn" title="Upload image for AI analysis">
                             <span class="material-symbols-outlined text-[22px]">add_photo_alternate</span>
                         </button>
-                    <div class="relative flex-1">
+                        <div class="relative flex-1">
                             <input id="chatInput"
                                 class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl py-3.5 sm:py-4 pl-5 sm:pl-6 pr-12 sm:pr-14 text-sm sm:text-base focus:ring-2 focus:ring-primary/50 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                 placeholder="Ask a health question or upload an image..." type="text" />
                             <!-- Mic button: tap to start/stop recording -->
-                            <button id="micBtn"
-                                title="Hold to record voice message"
+                            <button id="micBtn" title="Hold to record voice message"
                                 class="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-primary transition-colors rounded-full">
                                 <span class="material-symbols-outlined text-xl">mic</span>
                             </button>
@@ -536,6 +948,10 @@
     </div>
 
     <script>
+        let selectedLanguage = 'en';
+        let messageHistory = [];
+        let isFirstMessageInSession = true;
+
         document.addEventListener('DOMContentLoaded', () => {
             const chatInput = document.getElementById('chatInput');
             const sendBtn = document.getElementById('sendBtn');
@@ -550,21 +966,29 @@
 
             const SYSTEM_PROMPT = {
                 role: "system",
-                content: "You are SwasthyaSaathi AI, a deeply empathetic, warm, and highly caring health assistant. Your goal is to provide general healthcare awareness, information on diseases, and prevention techniques while offering comfort and support. CRITICAL GUIDELINES FOR EMOTIONS & TONE: 1) EMPATHY FIRST: If the user mentions any pain, symptom, illness, or discomfort, you MUST start your response with a highly caring, compassionate, and comforting message. Express genuine sympathy and concern (e.g., 'Oh, I am so sorry to hear you are going through this. Please make sure you are resting well! 🤗'). Never respond in a cold, robotic, or brief way. 2) TONE & EMOJIS: Keep your tone extremely gentle, reassuring, and human. Use plenty of comforting and health-related emojis (e.g., 🩺, ❤️, 🤗, 🌸, 💧, 🍵, 🥺, 🩹) to make the chat feel like talking to a loving family member or a caring friend. 3) DETAILED & THOROUGH CONTENT: Do not give short, lazy, or one-sentence replies. Provide detailed, well-structured, and rich explanations covering symptoms, prevention, home care tips, and general advice. Keep the language simple, warm, and easy to understand. 4) MEDICAL LIABILITY & EMERGENCY: Do not provide definitive medical diagnoses. If a user presents severe symptoms, always advise them to seek immediate medical help or call emergency services like 108. 5) HEALTH FOCUS ONLY: You must ONLY answer questions related to health, wellness, medical conditions, or the SwasthyaSaathi app. If a user asks something unrelated, politely and warmly refuse, explaining that your heart and purpose are dedicated to helping them stay healthy. FORMAT: Use markdown — bullet points, short paragraphs, bold key terms. IMAGE ANALYSIS: When the user uploads an image (medical report, prescription, X-ray, skin condition, rash, eye, wound, or any health-related photo), carefully and empathetically analyse it and provide: 1) What you observe in the image, 2) Possible health implications in simple language, 3) Whether immediate medical attention is advised. Always clarify you cannot replace a licensed doctor. IMPORTANT INSTRUCTION: At the very end of EVERY response, you MUST provide exactly 3 short follow-up questions the user could ask next. Prefix this section exactly with '|||SUGGESTIONS|||' followed by the questions separated by '|'. Example: |||SUGGESTIONS|||What is Dengue?|How to prevent malaria?|Nearest hospital?"
+                content: "You are SwasthyaSaathi AI, an experienced and compassionate healthcare assistant. Your communication style should feel like a calm, knowledgeable doctor speaking directly to a patient.\n\nGOAL: Help users understand their symptoms, identify possible conditions, understand severity, know what to do next, learn common treatments, and learn precautions. Never sound robotic or overly technical.\n\nTONE: Warm, professional, reassuring, human, practical, doctor-like. Always make users feel heard and supported.\n\nSTEP 1 — UNDERSTAND THE CASE: If symptoms are incomplete, ask only 1-3 most relevant questions (e.g. 'Since when have you been experiencing this?', 'Do you also have fever, cough, or body aches?', 'Is the pain mild, moderate, or severe?').\n\nSTEP 2 — IF SUFFICIENT INFORMATION EXISTS: Do NOT ask unnecessary questions. Immediately provide guidance. Example: 'I understand your concern. Based on the symptoms you have described, this may be related to a urinary tract infection (UTI), although other causes are also possible.'\n\nSTEP 3 — RESPONSE FORMAT (use these short sections, only include sections that are relevant):\n\n🩺 What This Could Be\nExplain likely condition(s) in 1-2 sentences.\n\n📌 Why It May Be Happening\nList possible causes as bullet points.\n\n💊 Commonly Used Medicines\nMention commonly used medicines for educational purposes only. Always add: 'Please do not start any medication without consulting a qualified healthcare professional.'\n\n✅ What You Should Do Now\nGive practical steps (drink water, rest, monitor symptoms, etc).\n\n❌ What To Avoid\nList things to avoid (self-medication, dehydration, etc).\n\n👨‍⚕️ When To Consult A Doctor\nExamples: symptoms last more than 2-3 days, fever becomes high, pain worsens.\n\n🚨 Seek Immediate Medical Help If\nShow ONLY when relevant (difficulty breathing, chest pain, loss of consciousness, severe bleeding).\n\n💙 Final Advice\nEnd naturally with a caring closing like 'Most cases improve with proper care, but monitoring your symptoms is important. Please take care.'\n\nIMPORTANT RULES:\n1. Never sound like a legal disclaimer machine.\n2. Never say 'I am just an AI' or 'I cannot help'.\n3. Always provide practical guidance.\n4. CRITICAL: Keep responses between 80-150 words. Be concise. Do NOT write walls of text.\n5. If user already provided all symptoms, do NOT ask repeated questions.\n6. Act like a trusted doctor guiding a patient, not a search engine.\n7. Be confident but not overconfident.\n8. Use simple language understandable by a common person.\n9. Only answer health and fitness questions. Politely decline unrelated topics.\n    10. No vulgar or offensive language.
+    11. LANGUAGE AND SCRIPT RULES: Reply in the same language the user communicates in. Distinguish Hindi and Urdu: if the user communicates in Hindi or Hinglish, respond in Devanagari script Hindi. Never use Urdu Nastaliq script or Urdu-specific vocabulary for Hindi/Hinglish inputs.
+    12. DETAILED INQUIRIES: If the user explicitly asks for "details", "causes", "symptoms", "prevention", or "treatment" (such as clicking a 'Learn More' button), you must provide a highly structured, comprehensive response. Use clear Markdown headings (H3), bullet points, bold text for key terms, and line breaks. You do NOT need to restrict to 150 words for detailed inquiries; focus on readability and depth.
+
+    IMAGE ANALYSIS: When the user uploads an image (medical report, prescription, X-ray, skin condition, rash, wound, etc), analyse it using the same short sections above. Provide: what you observe, possible implications, whether medical attention is needed. Keep it concise.
+
+    DETAIL TOPIC INSTRUCTION: After your response, if you mentioned a specific health condition or disease, output on a new line: |||DETAIL_TOPIC|||condition name. For example: |||DETAIL_TOPIC|||Urinary Tract Infection (UTI). If you only asked questions and did not identify a condition yet, skip this marker.
+
+    IMPORTANT INSTRUCTION: At the very end of EVERY response, you MUST provide exactly 3 short follow-up questions the user could ask next. Prefix this section exactly with '|||SUGGESTIONS|||' followed by the questions separated by '|'. Example: |||SUGGESTIONS|||What is Dengue?|How to prevent malaria?|Nearest hospital?`
             };
 
-            let messageHistory = [SYSTEM_PROMPT];
-            let isFirstMessageInSession = true;
+            messageHistory = [SYSTEM_PROMPT];
+            isFirstMessageInSession = true;
 
             // ── Image Upload State ────────────────────────────────────────
             let pendingImages = []; // [{dataUrl, mimeType, name}]
 
-            const imageFileInput      = document.getElementById('imageFileInput');
-            const imageUploadBtn      = document.getElementById('imageUploadBtn');
-            const imagePreviewStrip   = document.getElementById('imagePreviewStrip');
-            const imgLightbox         = document.getElementById('imgLightbox');
-            const imgLightboxImg      = document.getElementById('imgLightboxImg');
-            const imgLightboxClose    = document.getElementById('imgLightboxClose');
+            const imageFileInput = document.getElementById('imageFileInput');
+            const imageUploadBtn = document.getElementById('imageUploadBtn');
+            const imagePreviewStrip = document.getElementById('imagePreviewStrip');
+            const imgLightbox = document.getElementById('imgLightbox');
+            const imgLightboxImg = document.getElementById('imgLightboxImg');
+            const imgLightboxClose = document.getElementById('imgLightboxClose');
 
             // Open file picker
             imageUploadBtn.addEventListener('click', () => imageFileInput.click());
@@ -736,14 +1160,14 @@
 
                 // Create an empty AI bubble that we will populate via stream
                 const aiContentContainer = createAIBubble();
-                
+
                 let contextualizedText = text;
                 const locationKeywords = ["near", "closest", "around me", "where can i find", "clinic", "hospital", "doctor", "dentist", "pediatrician", "cardiologist", "dermatologist", "surgeon", "center"];
                 const wantsLocation = locationKeywords.some(kw => text.toLowerCase().includes(kw));
 
                 if (wantsLocation && navigator.geolocation) {
                     aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-pulse">location_on</span> Getting location from your browser to answer accurately...</span>`;
-                    
+
                     try {
                         const pos = await new Promise((resolve, reject) => {
                             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 });
@@ -770,7 +1194,7 @@
                     } catch (err) {
                         contextualizedText = text + `\n\n[URGENT HIDDEN INSTRUCTION: The user is asking for nearby healthcare, but browser location was denied. Ask them to enable permissions or type their exact City name securely.]`;
                     }
-                    
+
                     // Restore typing indicator for standard response processing
                     aiContentContainer.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
                 }
@@ -778,12 +1202,39 @@
                 // Build user message — multipart if images are attached
                 let userHistoryMsg;
                 if (imagesToSend.length > 0) {
+                    aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-pulse">biotech</span> Analysing image with SwasthyaSaathi Vision...</span>`;
+                    
                     const parts = [];
                     if (contextualizedText) parts.push({ type: 'text', text: contextualizedText });
-                    imagesToSend.forEach(img => {
-                        parts.push({ type: 'image_url', image_url: { url: img.dataUrl } });
-                    });
+                    
+                    for (const img of imagesToSend) {
+                        try {
+                            const digitizeRes = await fetch('/api/digitize', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ imageBase64: img.dataUrl, mimeType: img.mimeType })
+                            });
+                            if (digitizeRes.ok) {
+                                const digitizeJson = await digitizeRes.json();
+                                if (digitizeJson.text) {
+                                    parts.push({
+                                        type: 'text',
+                                        text: `[🩺 IMAGE ANALYSIS (Prescription/Report/Condition digitized via SwasthyaSaathi):\n${digitizeJson.text}\n]`
+                                    });
+                                } else {
+                                    parts.push({ type: 'image_url', image_url: { url: img.dataUrl } });
+                                }
+                            } else {
+                                parts.push({ type: 'image_url', image_url: { url: img.dataUrl } });
+                            }
+                        } catch (err) {
+                            console.error("Digitization failed:", err);
+                            parts.push({ type: 'image_url', image_url: { url: img.dataUrl } });
+                        }
+                    }
                     userHistoryMsg = { role: 'user', content: parts };
+                    // Restore typing indicator for standard response processing
+                    aiContentContainer.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
                 } else {
                     userHistoryMsg = { role: 'user', content: contextualizedText };
                 }
@@ -808,6 +1259,7 @@
                     let done = false;
                     let fullResponse = "";
                     let buffer = "";
+                    let hasStreamError = false;
 
                     while (!done) {
                         const { value, done: readerDone } = await reader.read();
@@ -831,16 +1283,20 @@
                                         const parsed = JSON.parse(dataStr);
                                         if (parsed.error) {
                                             aiContentContainer.innerHTML = `<span class="text-red-500 font-medium">Error: ${parsed.error}</span>`;
+                                            hasStreamError = true;
                                             done = true;
                                             break;
                                         }
                                         if (parsed.content) {
                                             fullResponse += parsed.content;
 
-                                            // Filter out suggestions part purely for display
+                                            // Filter out markers purely for display
                                             let displayContent = fullResponse;
-                                            if (fullResponse.includes('|||SUGGESTIONS|||')) {
-                                                displayContent = fullResponse.split('|||SUGGESTIONS|||')[0];
+                                            if (displayContent.includes('|||DETAIL_TOPIC|||')) {
+                                                displayContent = displayContent.split('|||DETAIL_TOPIC|||')[0];
+                                            }
+                                            if (displayContent.includes('|||SUGGESTIONS|||')) {
+                                                displayContent = displayContent.split('|||SUGGESTIONS|||')[0];
                                             }
 
                                             // Parse the display content continuously with Marked.js
@@ -855,32 +1311,59 @@
                         }
                     }
 
-                    // Once stream is complete, process suggestions
-                    let finalDisplayContent = fullResponse;
-                    if (fullResponse.includes('|||SUGGESTIONS|||')) {
-                        const parts = fullResponse.split('|||SUGGESTIONS|||');
-                        finalDisplayContent = parts[0];
+                    if (!hasStreamError) {
+                        // Once stream is complete, parse detail topic and suggestions
+                        let finalDisplayContent = fullResponse;
+                        let detailTopic = '';
 
-                        const suggestions = parts[1].split('|').map(s => s.trim()).filter(s => s.length > 0);
-                        renderSuggestions(suggestions);
-                    } else {
-                        // Fallback clear if model ignored the instruction
-                        suggestedPillsContainer.innerHTML = '';
-                    }
+                        // Extract |||DETAIL_TOPIC|||
+                        if (finalDisplayContent.includes('|||DETAIL_TOPIC|||')) {
+                            const dtParts = finalDisplayContent.split('|||DETAIL_TOPIC|||');
+                            finalDisplayContent = dtParts[0];
+                            // The detail topic may have |||SUGGESTIONS||| after it
+                            let topicRaw = dtParts[1] || '';
+                            if (topicRaw.includes('|||SUGGESTIONS|||')) {
+                                const subParts = topicRaw.split('|||SUGGESTIONS|||');
+                                detailTopic = subParts[0].trim();
+                                // Re-attach suggestions to finalDisplayContent for next step
+                                finalDisplayContent += '|||SUGGESTIONS|||' + subParts[1];
+                            } else {
+                                detailTopic = topicRaw.trim();
+                            }
+                        }
 
-                    // Add Assistant response to history for context (only the visible part)
-                    // Store as plain text string regardless of whether user sent images
-                    messageHistory.push({ role: "assistant", content: finalDisplayContent });
+                        // Extract |||SUGGESTIONS|||
+                        if (finalDisplayContent.includes('|||SUGGESTIONS|||')) {
+                            const parts = finalDisplayContent.split('|||SUGGESTIONS|||');
+                            finalDisplayContent = parts[0];
 
-                    // Show image analysis indicator if images were sent
-                    if (imagesToSend.length > 0) {
-                        const analysedNote = aiContentContainer.querySelector('.img-analysis-note');
-                        if (!analysedNote) {
-                            const note = document.createElement('div');
-                            note.className = 'analysing-badge img-analysis-note mt-3';
-                            note.style.cssText = 'color:#059669;background:#ecfdf5;border-color:#a7f3d0;';
-                            note.innerHTML = '<span class="material-symbols-outlined" style="font-size:13px">check_circle</span> Image analysed by Gemini Vision';
-                            aiContentContainer.appendChild(note);
+                            const suggestions = parts[1].split('|').map(s => s.trim()).filter(s => s.length > 0);
+                            renderSuggestions(suggestions);
+                        } else {
+                            suggestedPillsContainer.innerHTML = '';
+                        }
+
+                        // Render the clean content
+                        aiContentContainer.innerHTML = marked.parse(finalDisplayContent);
+
+                        // Add "Know More" action buttons if a condition was identified
+                        if (detailTopic) {
+                            renderDetailActions(aiContentContainer, detailTopic);
+                        }
+
+                        // Add Assistant response to history for context (only the visible part)
+                        messageHistory.push({ role: "assistant", content: finalDisplayContent });
+
+                        // Show image analysis indicator if images were sent
+                        if (imagesToSend.length > 0) {
+                            const analysedNote = aiContentContainer.querySelector('.img-analysis-note');
+                            if (!analysedNote) {
+                                const note = document.createElement('div');
+                                note.className = 'analysing-badge img-analysis-note mt-3';
+                                note.style.cssText = 'color:#059669;background:#ecfdf5;border-color:#a7f3d0;';
+                                note.innerHTML = '<span class="material-symbols-outlined" style="font-size:13px">check_circle</span> Analysed by SwasthyaSaathi';
+                                aiContentContainer.appendChild(note);
+                            }
                         }
                     }
 
@@ -903,19 +1386,47 @@
 
             function renderSuggestions(suggestions) {
                 suggestedPillsContainer.innerHTML = '';
-                suggestions.slice(0, 3).forEach(suggestion => {
+                const icons = ['chat_bubble_outline', 'help_outline', 'explore'];
+                suggestions.slice(0, 3).forEach((suggestion, idx) => {
                     const btn = document.createElement('button');
-                    btn.className = "suggestion-btn px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary rounded-full text-xs font-semibold text-slate-600 dark:text-slate-400 transition-all border border-slate-200 dark:border-slate-700";
-                    btn.innerText = suggestion;
+                    btn.className = 'suggestion-btn';
+                    btn.innerHTML = `<span class="material-symbols-outlined">${icons[idx % icons.length]}</span>${suggestion}`;
                     suggestedPillsContainer.appendChild(btn);
                 });
                 bindSuggestions();
             }
 
+            // Render interactive "Know More" action buttons below an AI message
+            function renderDetailActions(container, topic) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'detail-actions';
+
+                const actions = [
+                    { icon: 'menu_book', colorClass: 'da-icon-blue', label: `Learn more about ${topic}`, query: `Tell me in detail about ${topic} — causes, symptoms, diagnosis, and treatment.` },
+                    { icon: 'shield', colorClass: 'da-icon-green', label: 'Prevention tips', query: `What are the best prevention tips and precautions for ${topic}?` },
+                    { icon: 'medication', colorClass: 'da-icon-purple', label: 'Medicine details', query: `What medicines are commonly used for ${topic}? Explain their uses and side effects.` },
+                    { icon: 'restaurant', colorClass: 'da-icon-orange', label: 'Diet & lifestyle', query: `What diet and lifestyle changes help with ${topic}?` }
+                ];
+
+                actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = 'detail-action-btn';
+                    btn.innerHTML = `<div class="da-icon ${action.colorClass}"><span class="material-symbols-outlined">${action.icon}</span></div><span>${action.label}</span>`;
+                    btn.addEventListener('click', () => {
+                        chatInput.value = action.query;
+                        sendMessage();
+                    });
+                    actionsDiv.appendChild(btn);
+                });
+
+                container.appendChild(actionsDiv);
+                scrollToBottom();
+            }
+
             // Bind initial suggestions
             bindSuggestions();
 
-            function addRecentConsultation(query) {
+            window.addRecentConsultation = function(query) {
                 // Keep it short for the sidebar (first ~3-4 words)
                 const snippet = query.split(' ').slice(0, 4).join(' ') + (query.split(' ').length > 4 ? '...' : '');
 
@@ -989,16 +1500,16 @@
             // ══════════════════════════════════════════════════════════════
             // WhatsApp-style Voice Message Pipeline
             // ══════════════════════════════════════════════════════════════
-            const micBtn            = document.getElementById('micBtn');
+            const micBtn = document.getElementById('micBtn');
             const voiceRecordingBar = document.getElementById('voiceRecordingBar');
-            const cancelRecBtn      = document.getElementById('cancelRecBtn');
-            const recTimerEl        = document.getElementById('recTimer');
+            const cancelRecBtn = document.getElementById('cancelRecBtn');
+            const recTimerEl = document.getElementById('recTimer');
 
-            let mediaRecorder   = null;
-            let audioChunks     = [];
+            let mediaRecorder = null;
+            let audioChunks = [];
             let recTimerInterval = null;
-            let recSeconds      = 0;
-            let isRecording     = false;
+            let recSeconds = 0;
+            let isRecording = false;
             let isProcessingVoice = false;
             let globalAudioStream = null;
 
@@ -1032,7 +1543,7 @@
                             globalAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                         }
                     }
-                    
+
                     const stream = globalAudioStream;
                     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
                         ? 'audio/webm;codecs=opus'
@@ -1050,8 +1561,8 @@
                     mediaRecorder.onstop = async () => {
                         // DO NOT stop the global tracks, keep them active for the next recording
                         if (!isRecording) return; // cancelled
-                        
-                        isRecording = false; 
+
+                        isRecording = false;
                         isProcessingVoice = true;
                         micBtn.style.opacity = '0.5';
                         micBtn.style.pointerEvents = 'none';
@@ -1123,9 +1634,9 @@
                             </button>
                             <div class="voice-waveform">
                                 <svg viewBox="0 0 120 28" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
-                                    ${[4,8,14,10,18,12,7,15,9,6,13,11,16,8,5,12,10,14,6,9].map((h,i)=>
-                                        `<rect x="${i*6+1}" y="${(28-h)/2}" width="3" rx="1.5" height="${h}" fill="rgba(255,255,255,0.7)"/>`
-                                    ).join('')}
+                                    ${[4, 8, 14, 10, 18, 12, 7, 15, 9, 6, 13, 11, 16, 8, 5, 12, 10, 14, 6, 9].map((h, i) =>
+                    `<rect x="${i * 6 + 1}" y="${(28 - h) / 2}" width="3" rx="1.5" height="${h}" fill="rgba(255,255,255,0.7)"/>`
+                ).join('')}
                                 </svg>
                             </div>
                             <span class="voice-duration text-white/80">${formatTime(durationSecs)}</span>
@@ -1166,9 +1677,9 @@
                             </button>
                             <div class="voice-waveform">
                                 <svg viewBox="0 0 120 28" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
-                                    ${[5,9,13,8,16,11,6,14,9,5,12,10,15,7,4,11,9,13,5,8].map((h,i)=>
-                                        `<rect x="${i*6+1}" y="${(28-h)/2}" width="3" rx="1.5" height="${h}" fill="#0ea5e9"/>`
-                                    ).join('')}
+                                    ${[5, 9, 13, 8, 16, 11, 6, 14, 9, 5, 12, 10, 15, 7, 4, 11, 9, 13, 5, 8].map((h, i) =>
+                    `<rect x="${i * 6 + 1}" y="${(28 - h) / 2}" width="3" rx="1.5" height="${h}" fill="#0ea5e9"/>`
+                ).join('')}
                                 </svg>
                             </div>
                             <span class="voice-duration" id="${id}_dur">0:00</span>
@@ -1180,7 +1691,7 @@
                     </div>`;
 
                 const audio = new Audio(audioSrc);
-                const playBtn  = wrapper.querySelector(`#${id}_play span`);
+                const playBtn = wrapper.querySelector(`#${id}_play span`);
                 const durLabel = wrapper.querySelector(`#${id}_dur`);
                 audio.onloadedmetadata = () => { durLabel.textContent = formatTime(Math.round(audio.duration)); };
                 audio.onended = () => { playBtn.textContent = 'play_arrow'; };
@@ -1193,7 +1704,7 @@
                 scrollToBottom();
 
                 // Auto-play AI voice reply
-                audio.play().catch(() => {});
+                audio.play().catch(() => { });
             }
 
             // ── Main voice processing pipeline ──────────────────────────────
@@ -1208,7 +1719,7 @@
                 try {
                     // 3. Convert blob → base64 (chunked to avoid stack overflow on large files)
                     const arrayBuffer = await blob.arrayBuffer();
-                    const uint8Array  = new Uint8Array(arrayBuffer);
+                    const uint8Array = new Uint8Array(arrayBuffer);
                     let binary = '';
                     const CHUNK = 8192;
                     for (let i = 0; i < uint8Array.length; i += CHUNK) {
@@ -1217,10 +1728,10 @@
                     const audioBase64 = btoa(binary);
 
                     // 4. Transcribe via Groq Whisper
-                    const sttRes  = await fetch('/api/transcribe', {
+                    const sttRes = await fetch('/api/transcribe', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ audioBase64, mimeType })
+                        body: JSON.stringify({ audioBase64, mimeType, lang: selectedLanguage })
                     });
                     const sttData = await sttRes.json();
                     const transcript = sttData.text?.trim() || '';
@@ -1234,23 +1745,126 @@
                     // 5. Update UI: show transcription under user bubble
                     aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-pulse">psychology</span> Thinking...</span>`;
 
-                    // 6. Add to message history and get AI text response (stream)
-                    const enhancedTranscript = transcript + "\\n\\n(SYSTEM NOTE: Please reply in the EXACT SAME LANGUAGE the user spoke. Start your response with the 2-letter language code in brackets. Example: '[hi] नमस्ते!' or '[ta] வணக்கம்!' or '[te] నమస్కారం!' or '[en] Hello!')";
-                    messageHistory.push({ role: 'user', content: enhancedTranscript });
+                    // 6. Build a VOICE-SPECIFIC message list with a conversational system prompt
+                    // This makes voice replies sound like a real doctor talking, not reading bullet points
+                    const VOICE_SYSTEM_PROMPT = {
+                        role: "system",
+                        content: "You are SwasthyaSaathi AI, an experienced and compassionate doctor having a voice conversation with a patient.\n\nCRITICAL RULES FOR VOICE REPLIES:\n1. Speak naturally and conversationally — like a calm, caring doctor sitting across from the patient.\n2. DO NOT use bullet points, numbered lists, emoji headings, or markdown formatting.\n3. DO NOT use emojis at all.\n4. Write in flowing sentences and short paragraphs, as if you are speaking out loud.\n5. Keep your reply between 60-120 words — concise but warm.\n6. Start with an empathetic acknowledgment: 'I understand...', 'That sounds concerning...', 'I hear you...'\n7. Then smoothly flow into what the condition could be, what they should do, and when to see a doctor.\n8. End with a reassuring line like a doctor would: 'You should feel better soon with proper care. Do let me know how you are feeling.'\n9. NEVER say 'I am just an AI' — you are their trusted health guide.\n10. If the user's symptoms are incomplete, ask 1-2 gentle follow-up questions conversationally.\n11. Reply in the EXACT SAME LANGUAGE the user spoke. Start your response with the 2-letter language code in brackets. Example: '[hi] ...' or '[en] ...'\n    - CRITICAL LANGUAGE SEPARATION: Hindi and Urdu are separate. If the user speaks/transcribes in Hindi (including Devanagari script or Hinglish/Latin-script Hindi), you MUST respond in Devanagari-script Hindi and tag it with '[hi]'. NEVER write in Urdu Nastaliq script or tag the response as '[ur]' for Hindi/Hinglish inputs.\n12. Only answer health and fitness questions. Politely decline unrelated topics.\n\nExample of a GOOD voice reply:\n'[en] I understand, that must be quite uncomfortable. From what you are describing — the burning sensation and frequent urge — this sounds like it could be a urinary tract infection, which is quite common. I would suggest you drink plenty of water, avoid holding your urine, and keep the area clean. If the symptoms do not improve in a day or two, or if you notice fever or blood, please see a doctor right away. For now, rest well and stay hydrated. Take care, and let me know if you need anything else.'\n\nAt the very end, provide exactly 3 follow-up questions prefixed with '|||SUGGESTIONS|||' separated by '|'. Example: |||SUGGESTIONS|||What causes UTI?|How to prevent infections?|When to see a urologist?"
+                    };
+
+                    // Detect if transcript is Hindi (contains Devanagari script or typical Hindi/Hinglish features) or if the UI is set to Hindi
+                    const containsDevanagari = /[\u0900-\u097F]/.test(transcript);
+                    let langHint = "";
+                    if (containsDevanagari || selectedLanguage === 'hi') {
+                        langHint = "\n\n(IMPORTANT CONTEXT: The user is communicating in Hindi. You MUST respond in Devanagari script Hindi and prefix the response with '[hi]'. Do not use Urdu or prefix with '[ur]'.)";
+                    } else if (selectedLanguage === 'or') {
+                        langHint = "\n\n(IMPORTANT CONTEXT: The user is communicating in Odia. You MUST respond in Odia script and prefix the response with '[or]'.)";
+                    } else {
+                        // Let the LLM detect, but reinforce Hindi/Urdu separation
+                        langHint = "\n\n(IMPORTANT CONTEXT: Distinguish Hindi and Urdu carefully. If the user speaks in Hindi or Hinglish, respond in Devanagari script Hindi tagged with '[hi]', not Urdu script or '[ur]'.)";
+                    }
+
+                    const dynamicVoiceSystemPrompt = {
+                        role: "system",
+                        content: VOICE_SYSTEM_PROMPT.content + langHint
+                    };
+
+                    // Build voice message history: voice system prompt + conversation context (without the structured system prompt)
+                    const voiceMessages = [dynamicVoiceSystemPrompt];
+                    // Add previous conversation context (skip the original structured system prompt at index 0)
+                    for (let i = 1; i < messageHistory.length; i++) {
+                        voiceMessages.push(messageHistory[i]);
+                    }
+                    // Add current user message
+                    voiceMessages.push({ role: 'user', content: transcript });
+
+                    // Also add to the main messageHistory for context continuity
+                    messageHistory.push({ role: 'user', content: transcript });
                     if (isFirstMessageInSession) { isFirstMessageInSession = false; addRecentConsultation(transcript); }
 
                     const chatRes = await fetch('/api/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ messages: messageHistory, voiceMode: true })
+                        body: JSON.stringify({ messages: voiceMessages, voiceMode: true })
                     });
 
-                    // 7. Collect the full AI text response
-                    const reader  = chatRes.body.getReader();
+                    // 7. Collect and stream the AI text response, queueing TTS chunks by sentence
+                    const reader = chatRes.body.getReader();
                     const decoder = new TextDecoder();
-                    let done = false, fullAIResponse = '', buffer = '';
+                    let done = false, fullAIResponse = '', buffer = '', hasVoiceStreamError = false;
 
-                    aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Generating audio reply...</span>`;
+                    aiContentContainer.innerHTML = `<span class="text-xs text-slate-500 italic flex items-center gap-1"><span class="material-symbols-outlined text-[14px] animate-pulse">psychology</span> SwasthyaSaathi is thinking...</span>`;
+
+                    let responseLang = 'en';
+                    let langDetected = false;
+                    let sentenceBuffer = "";
+                    let audioQueue = [];
+                    let isPlaying = false;
+                    let ttsActiveRequests = 0;
+
+                    function playNextInQueue() {
+                        if (audioQueue.length === 0) {
+                            isPlaying = false;
+                            return;
+                        }
+                        isPlaying = true;
+                        const audio = audioQueue.shift();
+                        audio.play().catch(e => {
+                            console.warn("Audio playback failed or was interrupted:", e);
+                            playNextInQueue(); // Skip and play next
+                        });
+                        audio.onended = () => {
+                            playNextInQueue();
+                        };
+                    }
+
+                    async function queueTTSChunk(text) {
+                        const cleanText = text
+                            .replace(/^\[[a-zA-Z-]+\]\s*/, '') // Strip starting lang tag
+                            .replace(/[*_`#~>|]/g, '') // Strip markdown
+                            .trim();
+                        
+                        if (!cleanText) return;
+                        ttsActiveRequests++;
+                        try {
+                            const res = await fetch('/api/tts', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ text: cleanText, lang: responseLang })
+                            });
+                            const data = await res.json();
+                            if (data.audioBase64) {
+                                const audio = new Audio(`data:audio/mp3;base64,${data.audioBase64}`);
+                                audioQueue.push(audio);
+                                if (!isPlaying) {
+                                    playNextInQueue();
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Failed to fetch TTS chunk:', e);
+                        } finally {
+                            ttsActiveRequests--;
+                        }
+                    }
+
+                    function processSentenceStream(text, isDone) {
+                        sentenceBuffer += text;
+                        // Split by sentence delimiters: . ? ! । or newline
+                        const regex = /[^.!?।\n]+[.!?।\n]+/g;
+                        let match;
+                        let lastIndex = 0;
+                        while ((match = regex.exec(sentenceBuffer)) !== null) {
+                            const sentence = match[0];
+                            queueTTSChunk(sentence);
+                            lastIndex = regex.lastIndex;
+                        }
+                        sentenceBuffer = sentenceBuffer.slice(lastIndex);
+                        
+                        if (isDone && sentenceBuffer.trim()) {
+                            queueTTSChunk(sentenceBuffer);
+                            sentenceBuffer = "";
+                        }
+                    }
 
                     while (!done) {
                         const { value, done: rDone } = await reader.read();
@@ -1265,54 +1879,100 @@
                                     if (d === '[DONE]') { done = true; break; }
                                     try {
                                         const p = JSON.parse(d);
-                                        if (p.content) fullAIResponse += p.content;
-                                    } catch(_) {}
+                                        if (p.error) {
+                                            aiContentContainer.innerHTML = `<span class="text-red-500 text-sm">Error: ${p.error}</span>`;
+                                            hasVoiceStreamError = true;
+                                            done = true;
+                                            break;
+                                        }
+                                        if (p.content) {
+                                            fullAIResponse += p.content;
+                                            
+                                            // Language detection
+                                            if (!langDetected) {
+                                                const langMatch = fullAIResponse.match(/^\[([a-zA-Z-]+)\]/);
+                                                if (langMatch) {
+                                                    responseLang = langMatch[1].toLowerCase();
+                                                    langDetected = true;
+                                                }
+                                            }
+
+                                            // Process newly added text chunk for TTS sentences
+                                            processSentenceStream(p.content, false);
+
+                                            // Update display text in real-time
+                                            let displayAI = fullAIResponse;
+                                            if (displayAI.match(/^\[[a-zA-Z-]+\]/)) {
+                                                displayAI = displayAI.replace(/^\[[a-zA-Z-]+\]\s*/, '');
+                                            }
+                                            if (displayAI.includes('|||DETAIL_TOPIC|||')) {
+                                                displayAI = displayAI.split('|||DETAIL_TOPIC|||')[0];
+                                            }
+                                            if (displayAI.includes('|||SUGGESTIONS|||')) {
+                                                displayAI = displayAI.split('|||SUGGESTIONS|||')[0];
+                                            }
+                                            aiContentContainer.innerHTML = marked.parse(displayAI.trim());
+                                            scrollToBottom();
+                                        }
+                                    } catch (_) { }
                                 }
                             }
                         }
                     }
 
-                    // Strip language tag if present
-                    let responseLang = 'en';
-                    let displayAI = fullAIResponse;
-                    const langMatch = displayAI.match(/^\[([a-zA-Z-]+)\]/);
-                    if (langMatch) {
-                        responseLang = langMatch[1].toLowerCase();
-                        displayAI = displayAI.replace(/^\[[a-zA-Z-]+\]\s*/, '').trim();
-                    }
+                    // Flush any remaining sentence buffer
+                    processSentenceStream("", true);
 
-                    // Strip suggestion markers
-                    if (displayAI.includes('|||SUGGESTIONS|||')) {
-                        const parts = displayAI.split('|||SUGGESTIONS|||');
-                        displayAI = parts[0];
-                        const suggestions = parts[1].split('|').map(s => s.trim()).filter(Boolean);
-                        renderSuggestions(suggestions);
-                    }
+                    if (!hasVoiceStreamError) {
+                        let displayAI = fullAIResponse;
+                        if (displayAI.match(/^\[[a-zA-Z-]+\]/)) {
+                            displayAI = displayAI.replace(/^\[[a-zA-Z-]+\]\s*/, '');
+                        }
+                        if (displayAI.includes('|||DETAIL_TOPIC|||')) {
+                            displayAI = displayAI.split('|||DETAIL_TOPIC|||')[0];
+                        }
+                        let suggestions = [];
+                        if (displayAI.includes('|||SUGGESTIONS|||')) {
+                            const parts = displayAI.split('|||SUGGESTIONS|||');
+                            displayAI = parts[0].trim();
+                            suggestions = parts[1].split('|').map(s => s.trim()).filter(Boolean);
+                        }
 
-                    // Remove the instruction suffix from history so it doesn't pollute context
-                    if (messageHistory.length > 0 && messageHistory[messageHistory.length - 1].role === 'user') {
-                        messageHistory[messageHistory.length - 1].content = transcript;
-                    }
+                        // Save clean text to main history for context continuity
+                        messageHistory.push({ role: 'assistant', content: displayAI });
 
-                    // Save clean text to history
-                    messageHistory.push({ role: 'assistant', content: displayAI.trim() });
+                        // Render suggestions if available
+                        if (suggestions.length > 0) {
+                            renderSuggestions(suggestions);
+                        }
 
-                    // 8. Convert AI reply to speech (TTS)
-                    const ttsRes  = await fetch('/api/tts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: displayAI.replace(/[*_`#~>|]/g, ''), lang: responseLang })
-                    });
-                    const ttsData = await ttsRes.json();
+                        // 8. Fetch consolidated full TTS in the background for the replay button
+                        const finalDisplay = displayAI;
+                        const finalLang = responseLang;
+                        
+                        // Clean for natural audio: remove markdown symbols and extra whitespace
+                        const ttsText = finalDisplay
+                            .replace(/[*_`#~>|]/g, '')
+                            .replace(/\n{2,}/g, '. ')
+                            .replace(/\n/g, ' ')
+                            .replace(/\s{2,}/g, ' ')
+                            .trim();
 
-                    if (ttsData.audioBase64) {
-                        // 9. Remove typing bubble and show AI voice bubble with transcript
-                        const bubbleWrapper = aiContentContainer.closest('[class*="flex"][class*="items-end"]') || aiContentContainer.parentElement?.parentElement;
-                        if (bubbleWrapper) bubbleWrapper.remove();
-                        appendAIVoiceBubble(ttsData.audioBase64, displayAI.trim());
-                    } else {
-                        // TTS failed — fall back to text reply
-                        aiContentContainer.innerHTML = marked.parse(displayAI);
+                        fetch('/api/tts', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: ttsText, lang: finalLang })
+                        })
+                        .then(res => res.json())
+                        .then(ttsData => {
+                            if (ttsData.audioBase64) {
+                                // Swap temporary chat bubble with standard AI voice bubble containing full audio replay
+                                const bubbleWrapper = aiContentContainer.closest('[class*="flex"][class*="items-end"]') || aiContentContainer.parentElement?.parentElement;
+                                if (bubbleWrapper) bubbleWrapper.remove();
+                                appendAIVoiceBubble(ttsData.audioBase64, finalDisplay);
+                            }
+                        })
+                        .catch(e => console.error('Consolidated background TTS failed:', e));
                     }
 
                 } catch (err) {
@@ -1365,6 +2025,7 @@
 
             function triggerTranslation(langCode, btn) {
                 setActiveButton(btn);
+                selectedLanguage = langCode;
 
                 // Locate the google translate dropdown via its standard class structure
                 const selectEl = document.querySelector('.goog-te-combo');
@@ -1380,10 +2041,405 @@
             btnEn.addEventListener('click', () => triggerTranslation('en', btnEn));
             btnHi.addEventListener('click', () => triggerTranslation('hi', btnHi));
             btnOr.addEventListener('click', () => triggerTranslation('or', btnOr));
+            
+            // ==========================================
+            // Real-Time Hands-Free Call Manager
+            // ==========================================
+            const callAiBtn = document.getElementById('callAiBtn');
+            const callOverlay = document.getElementById('callOverlay');
+            const endCallBtn = document.getElementById('endCallBtn');
+            const callPulse1 = document.getElementById('callPulse1');
+            const callPulse2 = document.getElementById('callPulse2');
+            const callStatusText = document.getElementById('callStatusText');
+
+            let callAudioCtx = null;
+            let callMicStream = null;
+            let callAnalyser = null;
+            let callMediaRecorder = null;
+            let callAudioChunks = [];
+            let callSilenceTimer = null;
+            let isCallActive = false;
+            let isCallSpeaking = false;
+            let isCallThinking = false;
+
+            const debugLog = document.getElementById('debugLog');
+            function logDebug(msg) {
+                console.log(`[Call Debug] ${msg}`);
+            }
+
+            // Simple audio queue for TTS chunks
+            let callPlayQueue = [];
+            let callIsPlayingTTS = false;
+            let currentCallAudioObj = null;
+
+            // Silence threshold configuration
+            const CALL_SILENCE_THRESHOLD_MS = 800; // 0.8s max silence
+            const CALL_VOLUME_THRESHOLD = 2; // out of 255 (highly sensitive)
+
+            callAiBtn.addEventListener('click', startCall);
+            endCallBtn.addEventListener('click', endCall);
+
+            function setCallAvatarPulsing(active) {
+                if(active) {
+                    callPulse1.style.animation = 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite';
+                    callPulse2.style.animation = 'ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite';
+                    callPulse1.style.display = 'block';
+                    callPulse2.style.display = 'block';
+                } else {
+                    callPulse1.style.animation = 'none';
+                    callPulse2.style.animation = 'none';
+                    callPulse1.style.display = 'none';
+                    callPulse2.style.display = 'none';
+                }
+            }
+
+            async function startCall() {
+                callOverlay.classList.remove('hidden');
+                setTimeout(() => callOverlay.classList.remove('opacity-0'), 10);
+                isCallActive = true;
+                if (callStatusText) callStatusText.textContent = "Connecting...";
+                
+                // Get microphone permission upfront
+                try {
+                    callMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                } catch(e) {
+                    alert('Microphone access required for calling.');
+                    endCall();
+                    return;
+                }
+
+                // AI starts by asking language preference
+                isCallSpeaking = true;
+                setCallAvatarPulsing(true);
+                
+                const greetingText = "Welcome to Swasthya Saathi! I am here to help you today. What language do you prefer? English, or Hindi?";
+                logDebug("Fetching greeting TTS...");
+                try {
+                    const res = await fetch('/api/tts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: greetingText, lang: 'en' })
+                    });
+                    const data = await res.json();
+                    if(data.audioBase64 && isCallActive) {
+                        logDebug("Greeting TTS successful, playing audio.");
+                        const audio = new Audio(`data:audio/mp3;base64,${data.audioBase64}`);
+                        currentCallAudioObj = audio;
+                        audio.play().catch(e => logDebug(`Play error: ${e.message}`));
+                        if (callStatusText) callStatusText.textContent = "Speaking...";
+                        audio.onended = () => {
+                            logDebug("Greeting ended. Starting listening.");
+                            isCallSpeaking = false;
+                            setCallAvatarPulsing(false);
+                            if(isCallActive) startListening();
+                        };
+                    } else {
+                        throw new Error('Greeting TTS failed');
+                    }
+                } catch (e) {
+                    console.error("Greeting failed", e);
+                    isCallSpeaking = false;
+                    setCallAvatarPulsing(false);
+                    if(isCallActive) startListening();
+                }
+            }
+
+            function endCall() {
+                isCallActive = false;
+                isCallSpeaking = false;
+                isCallThinking = false;
+                setCallAvatarPulsing(false);
+                callOverlay.classList.add('opacity-0');
+                setTimeout(() => callOverlay.classList.add('hidden'), 300);
+                
+                if (callMediaRecorder && callMediaRecorder.state !== 'inactive') {
+                    callMediaRecorder.stop();
+                }
+                if (callMicStream) {
+                    callMicStream.getTracks().forEach(t => t.stop());
+                }
+                if (callAudioCtx) {
+                    callAudioCtx.close();
+                }
+                if (currentCallAudioObj) {
+                    currentCallAudioObj.pause();
+                }
+                callPlayQueue = [];
+                clearTimeout(callSilenceTimer);
+            }
+
+            function startListening() {
+                if(!isCallActive || isCallSpeaking || isCallThinking) return;
+
+                callAudioChunks = [];
+                callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                callAnalyser = callAudioCtx.createAnalyser();
+                const source = callAudioCtx.createMediaStreamSource(callMicStream);
+                source.connect(callAnalyser);
+                
+                callAnalyser.fftSize = 512;
+                const bufferLength = callAnalyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                callMediaRecorder = new MediaRecorder(callMicStream, { mimeType: 'audio/webm' });
+                callMediaRecorder.ondataavailable = e => callAudioChunks.push(e.data);
+                callMediaRecorder.onstop = processCallAudio;
+
+                callMediaRecorder.start();
+                if (callStatusText) callStatusText.textContent = "Listening...";
+                
+                let isTalking = false;
+                function checkVolume() {
+                    if(!isCallActive || isCallSpeaking || isCallThinking || callMediaRecorder.state === 'inactive') return;
+                    
+                    callAnalyser.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for(let i=0; i<bufferLength; i++) { sum += dataArray[i]; }
+                    let average = sum / bufferLength;
+
+                    if (average > CALL_VOLUME_THRESHOLD) {
+                        isTalking = true;
+                        clearTimeout(callSilenceTimer);
+                        callSilenceTimer = null;
+                        setCallAvatarPulsing(true); // User is speaking, gently pulse
+                        if (callStatusText) callStatusText.textContent = "Hearing you...";
+                    } else {
+                        setCallAvatarPulsing(false);
+                        if (isTalking && !callSilenceTimer) {
+                            if (callStatusText) callStatusText.textContent = "Listening...";
+                            callSilenceTimer = setTimeout(() => {
+                                if (callMediaRecorder.state !== 'inactive') {
+                                    callMediaRecorder.stop();
+                                }
+                            }, CALL_SILENCE_THRESHOLD_MS);
+                        }
+                    }
+                    requestAnimationFrame(checkVolume);
+                }
+                checkVolume();
+            }
+
+            async function processCallAudio() {
+                if(!isCallActive) return;
+                isCallThinking = true;
+                setCallAvatarPulsing(true); // Thinking...
+                if (callStatusText) callStatusText.textContent = "Thinking...";
+
+                const audioBlob = new Blob(callAudioChunks, { type: 'audio/webm' });
+                logDebug(`Audio stopped. Blob size: ${audioBlob.size}`);
+                if(audioBlob.size < 100) { 
+                    logDebug("Blob too small, skipping.");
+                    // Too short / just noise
+                    isCallThinking = false;
+                    setCallAvatarPulsing(false);
+                    if (callStatusText) callStatusText.textContent = "Listening...";
+                    startListening();
+                    return;
+                }
+
+                try {
+                    // 1. Transcribe
+                    const arrayBuffer = await audioBlob.arrayBuffer();
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    let binary = '';
+                    const CHUNK = 8192;
+                    for (let i = 0; i < uint8Array.length; i += CHUNK) binary += String.fromCharCode(...uint8Array.subarray(i, i + CHUNK));
+                    const audioBase64 = btoa(binary);
+
+                    const sttRes = await fetch('/api/transcribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ audioBase64, mimeType: 'audio/webm', lang: selectedLanguage })
+                    });
+                    const sttData = await sttRes.json();
+                    const transcript = sttData.text?.trim() || '';
+
+                    if (!transcript || transcript.length < 2) {
+                        isCallThinking = false;
+                        setCallAvatarPulsing(false);
+                        if (callStatusText) callStatusText.textContent = "Listening...";
+                        startListening();
+                        return;
+                    }
+
+                    // Push transcript to UI silently
+                    messageHistory.push({ role: 'user', content: transcript });
+                    if (isFirstMessageInSession) { isFirstMessageInSession = false; if(window.addRecentConsultation) window.addRecentConsultation(transcript); }
+
+                    // 2. Chat API
+                    const CALL_SYSTEM_PROMPT = {
+                        role: "system",
+                        content: "You are SwasthyaSaathi AI, an experienced and compassionate doctor having a voice conversation with a patient.\n\nCRITICAL RULES FOR VOICE REPLIES:\n1. Speak naturally and conversationally — like a calm, caring doctor sitting across from the patient.\n2. DO NOT use bullet points, numbered lists, emoji headings, or markdown formatting.\n3. DO NOT use emojis at all.\n4. Write in flowing sentences and short paragraphs, as if you are speaking out loud.\n5. Keep your reply between 30-80 words — concise but warm.\n6. Start with an empathetic acknowledgment: 'I understand...', 'That sounds concerning...', 'I hear you...'\n7. Then smoothly flow into what the condition could be, what they should do, and when to see a doctor.\n8. End with a reassuring line like a doctor would: 'You should feel better soon with proper care. Do let me know how you are feeling.'\n9. NEVER say 'I am just an AI' — you are their trusted health guide.\n10. If the user's symptoms are incomplete, ask 1-2 gentle follow-up questions conversationally.\n11. Reply in the EXACT SAME LANGUAGE the user spoke. Start your response with the 2-letter language code in brackets. Example: '[hi] ...' or '[en] ...'\n    - CRITICAL LANGUAGE SEPARATION: Hindi and Urdu are separate. If the user speaks/transcribes in Hindi (including Devanagari script or Hinglish/Latin-script Hindi), you MUST respond in Devanagari-script Hindi and tag it with '[hi]'. NEVER write in Urdu Nastaliq script or tag the response as '[ur]' for Hindi/Hinglish inputs.\n12. Only answer health and fitness questions. Politely decline unrelated topics."
+                    };
+
+                    const containsDevanagari = /[\u0900-\u097F]/.test(transcript);
+                    let langHint = "";
+                    if (containsDevanagari || selectedLanguage === 'hi') {
+                        langHint = "\n\n(IMPORTANT CONTEXT: The user is communicating in Hindi. You MUST respond in Devanagari script Hindi and prefix the response with '[hi]'. Do not use Urdu or prefix with '[ur]'.)";
+                    } else if (selectedLanguage === 'or') {
+                        langHint = "\n\n(IMPORTANT CONTEXT: The user is communicating in Odia. You MUST respond in Odia script and prefix the response with '[or]'.)";
+                    } else {
+                        langHint = "\n\n(IMPORTANT CONTEXT: Distinguish Hindi and Urdu carefully. If the user speaks in Hindi or Hinglish, respond in Devanagari script Hindi tagged with '[hi]', not Urdu script or '[ur]'.)";
+                    }
+
+                    const dynamicCallSystemPrompt = {
+                        role: "system",
+                        content: CALL_SYSTEM_PROMPT.content + langHint
+                    };
+
+                    const callMessages = [dynamicCallSystemPrompt];
+                    for (let i = 1; i < messageHistory.length; i++) callMessages.push(messageHistory[i]);
+
+                    const chatRes = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: callMessages, voiceMode: true })
+                    });
+                    logDebug(`Chat API returned: ${chatRes.status}`);
+
+                    // 3. TTS Streaming logic
+                    isCallThinking = false;
+                    isCallSpeaking = true;
+                    setCallAvatarPulsing(true);
+                    if (callStatusText) callStatusText.textContent = "Speaking...";
+
+                    const reader = chatRes.body.getReader();
+                    const decoder = new TextDecoder();
+                    let done = false, fullAIResponse = '', buffer = '', sentenceBuf = '';
+                    let responseLang = selectedLanguage, langDetected = false;
+                    
+                    callPlayQueue = [];
+                    callIsPlayingTTS = false;
+                    let pendingTTSRequests = 0;
+
+                    function checkIfFullyDone() {
+                        if (done && pendingTTSRequests === 0 && !callIsPlayingTTS && callPlayQueue.length === 0) {
+                            isCallSpeaking = false;
+                            setCallAvatarPulsing(false);
+                            if (callStatusText) callStatusText.textContent = "Listening...";
+                            if(isCallActive) startListening();
+                        }
+                    }
+
+                    function playNextCallChunk() {
+                        if (callPlayQueue.length === 0) {
+                            callIsPlayingTTS = false;
+                            checkIfFullyDone();
+                            return;
+                        }
+                        callIsPlayingTTS = true;
+                        if (callStatusText) callStatusText.textContent = "Speaking...";
+                        const audio = callPlayQueue.shift();
+                        currentCallAudioObj = audio;
+                        logDebug(`Playing next audio chunk...`);
+                        audio.play().catch(e => { logDebug(`Play error: ${e.message}`); playNextCallChunk(); });
+                        audio.onended = () => { logDebug(`Chunk ended.`); playNextCallChunk(); };
+                    }
+
+                    async function enqueueCallTTS(text) {
+                        const cleanText = text.replace(/^\[[a-zA-Z-]+\]\s*/, '').replace(/[*_`#~>|]/g, '').trim();
+                        if(!cleanText) return;
+                        
+                        pendingTTSRequests++;
+                        try {
+                            const res = await fetch('/api/tts', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ text: cleanText, lang: responseLang })
+                            });
+                            const data = await res.json();
+                            if(data.audioBase64 && isCallActive) {
+                                logDebug(`TTS success. Base64 length: ${data.audioBase64.length}`);
+                                const audio = new Audio(`data:audio/mp3;base64,${data.audioBase64}`);
+                                callPlayQueue.push(audio);
+                                if(!callIsPlayingTTS) playNextCallChunk();
+                            } else {
+                                logDebug(`TTS failed. data: ${JSON.stringify(data)}`);
+                            }
+                        } catch(e) {
+                            logDebug(`TTS fetch error: ${e.message}`);
+                            console.error("TTS fetch error", e);
+                        } finally {
+                            pendingTTSRequests--;
+                            checkIfFullyDone();
+                        }
+                    }
+
+                    while (!done) {
+                        const { value, done: rDone } = await reader.read();
+                        done = rDone;
+                        if(value) {
+                            buffer += decoder.decode(value, {stream:true});
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop();
+                            for(const line of lines) {
+                                if(line.startsWith('data: ')) {
+                                    const d = line.slice(6);
+                                    if(d === '[DONE]') { done = true; break; }
+                                    try {
+                                        const p = JSON.parse(d);
+                                        if(p.content) {
+                                            fullAIResponse += p.content;
+                                            if(!langDetected) {
+                                                const m = fullAIResponse.match(/^\[([a-zA-Z-]+)\]/);
+                                                if(m) { responseLang = m[1].toLowerCase(); langDetected = true; }
+                                            }
+                                            sentenceBuf += p.content;
+                                            const regex = /[^.!?।\n]+[.!?।\n]+/g;
+                                            let match, lastIndex = 0;
+                                            while((match = regex.exec(sentenceBuf)) !== null) {
+                                                enqueueCallTTS(match[0]);
+                                                lastIndex = regex.lastIndex;
+                                            }
+                                            sentenceBuf = sentenceBuf.slice(lastIndex);
+                                        }
+                                    } catch(_) {}
+                                }
+                            }
+                        }
+                    }
+                    if(sentenceBuf.trim()) enqueueCallTTS(sentenceBuf);
+                    
+                    logDebug(`Stream done. fullAIResponse: "${fullAIResponse}"`);
+                    // Save history
+                    let cleanAI = fullAIResponse.replace(/^\[[a-zA-Z-]+\]\s*/, '').trim();
+                    messageHistory.push({ role: 'assistant', content: cleanAI });
+
+                    checkIfFullyDone();
+
+                } catch(e) {
+                    logDebug(`Call process error: ${e.message}`);
+                    console.error("Call processing error:", e);
+                    isCallThinking = false;
+                    isCallSpeaking = false;
+                    setCallAvatarPulsing(false);
+                    if(isCallActive) startListening();
+                }
+            }
         });
     </script>
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- Real-time Call Overlay -->
+    <div id="callOverlay" class="fixed inset-0 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="relative flex items-center justify-center w-48 h-48 mb-12">
+            <!-- Pulsing circles -->
+            <div id="callPulse1" class="absolute inset-0 bg-primary/20 rounded-full animate-ping hidden" style="animation-duration: 2s;"></div>
+            <div id="callPulse2" class="absolute inset-4 bg-primary/40 rounded-full animate-ping hidden" style="animation-duration: 2s; animation-delay: 0.5s;"></div>
+            
+            <div class="absolute inset-8 rounded-full overflow-hidden border-4 border-primary shadow-2xl bg-white flex items-center justify-center z-10">
+                <img alt="AI Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3XmVFVgJKyqIXxZW2bDgF7yRRgcxUGjoUE7yAHp6nH6lLhmCUOxxcsJlpc6bW88Ziyv--7BD90qo-LlwZMHtoIHA_I_GL7yvDXUxP9SvnlMpc1ppz-9cvDRgVh5Yr2KqvIsBDWJYWzSXh6DXK6XjyLSGm5x5XyBPuNgXQlru7Hkabph1B1VNhfbX-C2UzZl9nj16MPjZxJuZdIk263QbiIM-Owsge4nUDvzTRXMod6zdHvWp8aiBZQnSL0qLi6wac8oNrMx1EUEk" onerror="this.src='https://ui-avatars.com/api/?name=Saathi&background=0D8ABC&color=fff&size=128'" />
+            </div>
+        </div>
+
+        <!-- Call Status Text -->
+        <div id="callStatusText" class="text-slate-900 dark:text-slate-100 text-xl font-medium tracking-wide mb-8">Connecting...</div>
+
+        <button id="endCallBtn" title="End Call" class="mt-8 size-16 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/30 transition-transform hover:scale-105 active:scale-95">
+            <span class="material-symbols-outlined text-3xl">call_end</span>
+        </button>
+    </div>
 </body>
 
 </html>

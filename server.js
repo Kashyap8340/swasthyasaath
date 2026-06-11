@@ -16,6 +16,152 @@ import schedule from 'node-schedule';
 
 const execPromise = util.promisify(exec);
 
+// Helper: Digitizing images using Sarvam AI Document Digitization REST API
+async function digitizeImage(base64Data, mimeType) {
+    const sarvamKey = process.env.SARVAM_API_KEY;
+    if (!sarvamKey) throw new Error('SARVAM_API_KEY not configured in .env');
+
+    const id = Date.now() + Math.random().toString(36).substring(7);
+    const matches = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    let actualBase64 = base64Data;
+    let ext = 'png';
+
+    if (matches && matches.length === 3) {
+        actualBase64 = matches[2];
+        const mime = matches[1].toLowerCase();
+        if (mime === 'image/jpeg' || mime === 'image/jpg') ext = 'jpg';
+    }
+
+    const imgBuffer = Buffer.from(actualBase64, 'base64');
+    const imageFile = `temp_v_${id}.${ext}`;
+    const zipFile = `temp_v_${id}.zip`;
+    const outZip = `out_v_${id}.zip`;
+    const outDir = `out_v_${id}_dir`;
+
+    try {
+        // Write image file to disk
+        fs.writeFileSync(imageFile, imgBuffer);
+
+        // Compress image to a zip file using the Windows bsdtar utility
+        await execPromise(`tar -c -f "${zipFile}" --format=zip "${imageFile}"`);
+
+        // 1. Create Digitization Job (output format: markdown for structured layout text)
+        const createJobRes = await axios.post("https://api.sarvam.ai/doc-digitization/job/v1", {
+            job_parameters: {
+                language: "en-IN",
+                output_format: "md"
+            }
+        }, {
+            headers: {
+                "api-subscription-key": sarvamKey,
+                "Content-Type": "application/json"
+            }
+        });
+        const jobId = createJobRes.data.job_id;
+
+        // 2. Request Upload URL
+        const uploadUrlsRes = await axios.post("https://api.sarvam.ai/doc-digitization/job/v1/upload-files", {
+            job_id: jobId,
+            files: [zipFile]
+        }, {
+            headers: {
+                "api-subscription-key": sarvamKey,
+                "Content-Type": "application/json"
+            }
+        });
+        const uploadUrl = uploadUrlsRes.data.upload_urls[zipFile].file_url;
+
+        // 3. Upload ZIP file to Azure Blob storage
+        const zipBuffer = fs.readFileSync(zipFile);
+        await axios.put(uploadUrl, zipBuffer, {
+            headers: {
+                "Content-Type": "application/octet-stream",
+                "x-ms-blob-type": "BlockBlob"
+            }
+        });
+
+        // 4. Start the job
+        await axios.post(`https://api.sarvam.ai/doc-digitization/job/v1/${jobId}/start`, {}, {
+            headers: { "api-subscription-key": sarvamKey }
+        });
+
+        // 5. Poll job status until complete
+        let completed = false;
+        let downloadUrl = "";
+        for (let attempt = 0; attempt < 30; attempt++) {
+            await new Promise(r => setTimeout(r, 1500));
+            const statusRes = await axios.get(`https://api.sarvam.ai/doc-digitization/job/v1/${jobId}/status`, {
+                headers: { "api-subscription-key": sarvamKey }
+            });
+            const state = statusRes.data?.job_state;
+            if (state && state.toLowerCase() === 'completed') {
+                // 6. Request Download URL
+                const downloadUrlsRes = await axios.post(`https://api.sarvam.ai/doc-digitization/job/v1/${jobId}/download-files`, {}, {
+                    headers: {
+                        "api-subscription-key": sarvamKey,
+                        "Content-Type": "application/json"
+                    }
+                });
+                downloadUrl = downloadUrlsRes.data.download_urls?.["document.zip"]?.file_url || 
+                              downloadUrlsRes.data.download_urls?.["document.zip"] || 
+                              Object.values(downloadUrlsRes.data.download_urls || {})[0]?.file_url || 
+                              Object.values(downloadUrlsRes.data.download_urls || {})[0];
+                completed = true;
+                break;
+            }
+            if (state && state.toLowerCase() === 'failed') {
+                throw new Error('Sarvam digitization job failed');
+            }
+        }
+
+        if (!completed || !downloadUrl) {
+            throw new Error('Timeout or missing download URL');
+        }
+
+        // 7. Download output ZIP
+        const downloadRes = await axios.get(downloadUrl, { responseType: 'arraybuffer' });
+        fs.writeFileSync(outZip, Buffer.from(downloadRes.data));
+
+        // 8. Extract output ZIP
+        fs.mkdirSync(outDir);
+        await execPromise(`tar -x -f "${outZip}" -C "${outDir}"`);
+
+        // 9. Read extracted Markdown contents
+        const files = fs.readdirSync(outDir);
+        const mdFile = files.find(f => f.endsWith('.md'));
+        let extractedText = "";
+        if (mdFile) {
+            extractedText = fs.readFileSync(join(outDir, mdFile), 'utf8');
+        }
+        return extractedText;
+
+    } finally {
+        // Safe cleanup of all temporary workspace files
+        try { if (fs.existsSync(imageFile)) fs.unlinkSync(imageFile); } catch (_) {}
+        try { if (fs.existsSync(zipFile)) fs.unlinkSync(zipFile); } catch (_) {}
+        try { if (fs.existsSync(outZip)) fs.unlinkSync(outZip); } catch (_) {}
+        try { if (fs.existsSync(outDir)) fs.rmSync(outDir, { recursive: true, force: true }); } catch (_) {}
+    }
+}
+
+// Helper: Clean messages array to format compatible with text-only models
+function cleanMessagesForTextModels(messages) {
+    return messages.map(m => {
+        if (Array.isArray(m.content)) {
+            let text = "";
+            m.content.forEach(part => {
+                if (part.type === 'text') {
+                    text += part.text + " ";
+                } else if (part.type === 'image_url') {
+                    text += "[Image Uploaded] ";
+                }
+            });
+            return { role: m.role, content: text.trim() };
+        }
+        return m;
+    });
+}
+
 // Configure Email Transporter
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -143,13 +289,29 @@ app.get('/api/places', async (req, res) => {
     return res.json({ context: null });
 });
 
+// Digitize Image: Pre-process image via Sarvam AI Document Digitization
+app.post('/api/digitize', async (req, res) => {
+    try {
+        const { imageBase64, mimeType } = req.body;
+        if (!imageBase64) return res.status(400).json({ error: 'imageBase64 required' });
+
+        console.log('[Digitize API] Starting image digitization...');
+        const text = await digitizeImage(imageBase64, mimeType || 'image/png');
+        console.log('[Digitize API] Image digitized successfully.');
+        return res.json({ text });
+    } catch (err) {
+        console.error('[Digitize API] Digitization failed:', err.message);
+        return res.status(500).json({ error: 'Digitization failed', detail: err.message });
+    }
+});
+
 // ══════════════════════════════════════════════════════════════════════
 // Voice STT: Transcribe audio → text via Groq Whisper
 // Groq supports: flac, mp3, mp4, mpeg, mpga, m4a, ogg, opus, wav, webm
 // ══════════════════════════════════════════════════════════════════════
 app.post('/api/transcribe', async (req, res) => {
     try {
-        const { audioBase64, mimeType = 'audio/webm' } = req.body;
+        const { audioBase64, mimeType = 'audio/webm', lang } = req.body;
         if (!audioBase64) return res.status(400).json({ error: 'audioBase64 required' });
 
         const GROQ_KEY = process.env.GROQ_API_KEY || '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';
@@ -165,6 +327,14 @@ app.post('/api/transcribe', async (req, res) => {
         formData.append('file', buffer, { filename: `audio.${ext}`, contentType: baseType });
         formData.append('model', 'whisper-large-v3');
         formData.append('response_format', 'json');
+
+        // Guide Whisper with language code if explicitly selected by user (non-English)
+        if (lang && lang.toLowerCase() !== 'en') {
+            formData.append('language', lang.toLowerCase());
+        }
+
+        // Prevent Hindi audio from transcribing to Urdu Nastaliq script by providing a script-biasing prompt
+        formData.append('prompt', 'Hello SwasthyaSaathi, health assistant. नमस्ते स्वास्थयसाथी, मुझे बुखार है। ନମସ୍କାର ସ୍ୱାସ୍ଥ୍ୟସାଥୀ।');
 
         console.log(`[STT] Sending ${(buffer.length / 1024).toFixed(1)} KB as audio.${ext} to Groq...`);
 
@@ -201,9 +371,54 @@ app.post('/api/tts', async (req, res) => {
             'ta': 'ta-IN-PallaviNeural', 'te': 'te-IN-ShrutiNeural',
             'bn': 'bn-IN-TanishaaNeural', 'gu': 'gu-IN-DhwaniNeural',
             'mr': 'mr-IN-AarohiNeural', 'ml': 'ml-IN-SobhanaNeural',
-            'kn': 'kn-IN-SapnaNeural'
+            'kn': 'kn-IN-SapnaNeural', 'or': 'or-IN-AnanyaNeural',
+            'ur': 'ur-IN-YasminNeural'
         };
         const voice = voiceMap[lang.toLowerCase()] || 'en-IN-NeerjaNeural';
+
+        // ── Attempt 0: Sarvam AI TTS (Outstanding quality for Indian languages) ──
+        const sarvamKey = process.env.SARVAM_API_KEY;
+        if (sarvamKey) {
+            try {
+                const langMap = {
+                    'en': 'en-IN', 'hi': 'hi-IN', 'ta': 'ta-IN', 'te': 'te-IN',
+                    'bn': 'bn-IN', 'gu': 'gu-IN', 'mr': 'mr-IN', 'ml': 'ml-IN',
+                    'kn': 'kn-IN', 'or': 'or-IN'
+                };
+                const targetLang = langMap[lang.toLowerCase()];
+                if (targetLang) {
+                    console.log(`[TTS] Requesting Sarvam AI TTS for language: ${targetLang}...`);
+                    const sarvamRes = await fetch("https://api.sarvam.ai/text-to-speech/stream", {
+                        method: "POST",
+                        headers: {
+                            "api-subscription-key": sarvamKey,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            text: safeText,
+                            target_language_code: targetLang,
+                            speaker: "shubh",
+                            model: "bulbul:v3",
+                            pace: 1.1,
+                            speech_sample_rate: 22050,
+                            output_audio_codec: "mp3",
+                            enable_preprocessing: true
+                        })
+                    });
+
+                    if (sarvamRes.ok) {
+                        const audioBuffer = await sarvamRes.arrayBuffer();
+                        const base64Audio = Buffer.from(audioBuffer).toString('base64');
+                        console.log('[TTS] Sarvam AI TTS succeeded');
+                        return res.json({ audioBase64: base64Audio });
+                    } else {
+                        console.warn(`[TTS] Sarvam AI failed with status ${sarvamRes.status}:`, await sarvamRes.text());
+                    }
+                }
+            } catch (sarvamErr) {
+                console.warn('[TTS] Sarvam AI TTS failed, falling back to edge-tts:', sarvamErr.message);
+            }
+        }
 
         // ── Attempt 1: edge-tts (needs Python, works locally & on servers) ──
         try {
@@ -222,7 +437,7 @@ app.post('/api/tts', async (req, res) => {
         }
 
         // ── Attempt 2: google-tts-api (pure JS, always works on Vercel) ──
-        const langCodeMap = { 'en': 'en', 'hi': 'hi', 'ta': 'ta', 'te': 'te', 'bn': 'bn', 'gu': 'gu', 'mr': 'mr', 'ml': 'ml', 'kn': 'kn' };
+        const langCodeMap = { 'en': 'en', 'hi': 'hi', 'ta': 'ta', 'te': 'te', 'bn': 'bn', 'gu': 'gu', 'mr': 'mr', 'ml': 'ml', 'kn': 'kn', 'or': 'or', 'ur': 'ur' };
         const gttsLang = langCodeMap[lang.toLowerCase()] || 'en';
 
         const urls = googleTTS.getAllAudioUrls(safeText, { lang: gttsLang, slow: false, splitPunct: ',.?!' });
@@ -259,39 +474,46 @@ app.post('/api/reminder', async (req, res) => {
         }
 
         // ── Helper: try each AI model in cascade (mirrors /api/chat priority) ──
+        // ── Helper: try each AI model in cascade (mirrors /api/chat priority) ──
         async function getAIMedicalDetails(itemName, itemType) {
             const systemPrompt = `You are a helpful medical assistant for SwasthyaSaathi AI.
 The user has set a reminder for a medicine or vaccine. Write a SHORT, friendly medical note (3-5 sentences) that includes:
-1. What this medicine/vaccine is commonly used for
-2. Key dosage or usage tip
-3. One important safety note or side-effect to watch for
+1. **What is it**: A clear explanation of what this medicine/vaccine is.
+2. **When to take it**: In which condition(s) or for which symptoms we should take it.
+3. **Precautions**: Important precautions, safety notes, or side-effects to watch out for.
 
-Use **bold** for section headings and keep it warm and easy to understand.`;
+Use **bold** for section headings (e.g., **What is it**, **When to take it**, **Precautions**) and keep it warm, simple, and easy to understand.`;
             const userPrompt = `Medicine/Vaccine: ${itemName}\nType: ${itemType}`;
             const messages = [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: userPrompt }
             ];
 
-            // 1. Kimi-k2.6 (primary, same as chat)
+            // 1. Groq Llama 3.3 (Primary - lightning fast and highly reliable)
             try {
-                const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-                    model: 'moonshotai/kimi-k2.6:free', stream: false, messages
-                }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` } });
+                const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+                const r = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                    model: 'llama-3.3-70b-versatile',
+                    messages: messages,
+                    stream: false
+                }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' } });
                 const text = r.data.choices?.[0]?.message?.content?.trim();
-                if (text) { console.log('[Reminder AI] Kimi-k2.6 responded'); return text; }
-            } catch (e) { console.warn('[Reminder AI] Kimi-k2.6 failed:', e.message); }
+                if (text) { console.log('[Reminder AI] Groq Llama 3.3 responded'); return text; }
+            } catch (e) { console.warn('[Reminder AI] Groq Llama 3.3 failed:', e.message); }
 
-            // 2. Qwen (secondary, same as chat)
+            // 2. Groq Llama 3.1 (Secondary)
             try {
-                const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-                    model: 'qwen/qwen3.6-plus-preview:free', stream: false, messages
-                }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY_2}` } });
+                const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+                const r = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                    model: 'llama-3.1-8b-instant',
+                    messages: messages,
+                    stream: false
+                }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' } });
                 const text = r.data.choices?.[0]?.message?.content?.trim();
-                if (text) { console.log('[Reminder AI] Qwen responded'); return text; }
-            } catch (e) { console.warn('[Reminder AI] Qwen failed:', e.message); }
+                if (text) { console.log('[Reminder AI] Groq Llama 3.1 responded'); return text; }
+            } catch (e) { console.warn('[Reminder AI] Groq Llama 3.1 failed:', e.message); }
 
-            // 3. Gemini (tertiary, same as chat)
+            // 3. Gemini (Tertiary)
             try {
                 const GEMINI_KEY = process.env.GEMINI_API_KEY;
                 const geminiBody = {
@@ -306,14 +528,16 @@ Use **bold** for section headings and keep it warm and easy to understand.`;
                 if (text) { console.log('[Reminder AI] Gemini responded'); return text; }
             } catch (e) { console.warn('[Reminder AI] Gemini failed:', e.message); }
 
-            // 4. Llama (last resort, same as chat)
-            try {
-                const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-                    model: 'meta-llama/llama-4-maverick:free', stream: false, messages
-                }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` } });
-                const text = r.data.choices?.[0]?.message?.content?.trim();
-                if (text) { console.log('[Reminder AI] Llama responded'); return text; }
-            } catch (e) { console.warn('[Reminder AI] Llama failed:', e.message); }
+            // 4. OpenRouter Free Models (Gemma 4 / Llama 4 as last resort)
+            for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free', 'meta-llama/llama-4-maverick:free']) {
+                try {
+                    const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+                        model: model, stream: false, messages
+                    }, { headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2}` } });
+                    const text = r.data.choices?.[0]?.message?.content?.trim();
+                    if (text) { console.log(`[Reminder AI] OpenRouter ${model} responded`); return text; }
+                } catch (e) { console.warn(`[Reminder AI] OpenRouter ${model} failed:`, e.message); }
+            }
 
             return ''; // All failed — send email without AI notes
         }
@@ -423,10 +647,42 @@ Use **bold** for section headings and keep it warm and easy to understand.`;
 //
 app.post('/api/chat', async (req, res) => {
     try {
-        const { messages } = req.body;
+        let { messages } = req.body;
 
         if (!messages || !Array.isArray(messages)) {
             return res.status(400).json({ error: 'Valid messages array is required' });
+        }
+
+        // If there are images and we have a Sarvam API key, pre-process them using Sarvam AI Vision
+        const hasImages = messages.some(m =>
+            Array.isArray(m.content) && m.content.some(part => part.type === 'image_url')
+        );
+
+        if (hasImages && process.env.SARVAM_API_KEY) {
+            console.log('[Sarvam Vision] Pre-processing images...');
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
+                if (Array.isArray(msg.content)) {
+                    for (let j = 0; j < msg.content.length; j++) {
+                        const part = msg.content[j];
+                        if (part.type === 'image_url' && part.image_url?.url?.startsWith('data:')) {
+                            try {
+                                const base64 = part.image_url.url;
+                                // Digitize image using Sarvam AI
+                                const digitizedText = await digitizeImage(base64, 'image/png');
+                                console.log('[Sarvam Vision] Digitized image text successfully.');
+                                // Replace image_url part with digitized text description
+                                msg.content[j] = {
+                                    type: 'text',
+                                    text: `[🩺 IMAGE ANALYSIS (Prescription/Report/Condition digitized via SwasthyaSaathi):\n${digitizedText}\n]`
+                                };
+                            } catch (digitizeErr) {
+                                console.error('[Sarvam Vision] Digitization failed:', digitizeErr.message);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // SSE headers
@@ -436,8 +692,8 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader('X-Accel-Buffering', 'no');
 
         // ── Detect image / voice request ──────────────────────────────────────
-        // voiceMode flag OR any message part with image_url / audio inlineData
-        const isMultimodal = req.body.voiceMode === true || messages.some(m =>
+        // Any message part with image_url or audio inlineData
+        const isMultimodal = messages.some(m =>
             Array.isArray(m.content) && m.content.some(part =>
                 part.type === 'image_url' ||
                 (part.inlineData && part.inlineData.mimeType?.startsWith('audio'))
@@ -448,10 +704,11 @@ app.post('/api/chat', async (req, res) => {
         // ── HELPER: stream Groq (OpenAI-compatible, Lightning Fast) ───────────
         async function streamGroq(modelName) {
             const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+            const cleanedMessages = cleanMessagesForTextModels(messages);
             const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: modelName, messages, stream: true })
+                body: JSON.stringify({ model: modelName, messages: cleanedMessages, stream: true })
             });
             if (!resp.ok) {
                 throw new Error(`Groq ${modelName} → HTTP ${resp.status}: ${await resp.text()}`);
@@ -486,10 +743,11 @@ app.post('/api/chat', async (req, res) => {
             const AR_BASE = process.env.AGENTROUTER_BASE_URL;
             if (!AR_KEY || !AR_BASE) throw new Error('AgentRouter not configured');
 
+            const cleanedMessages = cleanMessagesForTextModels(messages);
             const resp = await fetch(`${AR_BASE}/chat/completions`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${AR_KEY}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: modelName, messages, stream: true })
+                body: JSON.stringify({ model: modelName, messages: cleanedMessages, stream: true })
             });
             if (!resp.ok) {
                 throw new Error(`AgentRouter ${modelName} → HTTP ${resp.status}: ${await resp.text()}`);
@@ -521,7 +779,8 @@ app.post('/api/chat', async (req, res) => {
         // ── HELPER: connect to OpenRouter (returns open stream handle) ────────
         function connectOpenRouter(modelName, apiKey) {
             return new Promise((resolve, reject) => {
-                const postData = JSON.stringify({ model: modelName, messages, stream: true });
+                const cleanedMessages = cleanMessagesForTextModels(messages);
+                const postData = JSON.stringify({ model: modelName, messages: cleanedMessages, stream: true });
                 const req2 = https.request({
                     hostname: 'openrouter.ai',
                     path: '/api/v1/chat/completions',
@@ -653,7 +912,7 @@ app.post('/api/chat', async (req, res) => {
         // ── PATH B: TEXT — priority chain ─────────────────────────────────────
 
         // 1. Groq (Llama 3.3 - Lightning Fast Primary)
-        for (const model of ['llama-3.3-70b-versatile', 'llama3-8b-8192']) {
+        for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
             try {
                 console.log(`[1/6] Groq ${model} (Lightning Fast)...`);
                 await streamGroq(model);
@@ -662,50 +921,45 @@ app.post('/api/chat', async (req, res) => {
             } catch (err) { console.warn(`❌ [1/6] Groq ${model}: ${err.message}`); }
         }
 
-        // 2. Kimi-k2.6 (best standard text replies)
-        try {
-            console.log('[2/6] moonshotai/kimi-k2.6:free  (OpenRouter)...');
-            const orRes = await connectOpenRouter('moonshotai/kimi-k2.6:free', process.env.OPENROUTER_API_KEY);
-            console.log('✅ [2/6] Kimi-k2.6 responded!');
-            await pipeOpenRouter(orRes);
-            return;
-        } catch (err) { console.warn(`❌ [2/6] Kimi-k2.6: ${err.message}`); }
-
-        // 3. AgentRouter — DeepSeek  (r1-0528 → v3.2 → v3.1)
-        for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
+        // 2. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
+        for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free']) {
             try {
-                console.log(`[3/6] AgentRouter / ${model}...`);
-                await streamAgentRouter(model);
-                console.log(`✅ [3/6] AgentRouter/${model} responded!`);
+                console.log(`[2/6] OpenRouter ${model}...`);
+                const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
+                console.log(`✅ [2/6] OpenRouter ${model} responded!`);
+                await pipeOpenRouter(orRes);
                 return;
-            } catch (err) { console.warn(`❌ [3/6] AgentRouter/${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [2/6] OpenRouter ${model}: ${err.message}`); }
         }
 
-        // 4. Qwen
+        // 3. Gemini direct (text fallback)
         try {
-            console.log('[4/6] qwen/qwen3.6-plus-preview:free  (OpenRouter)...');
-            const orRes = await connectOpenRouter('qwen/qwen3.6-plus-preview:free', process.env.OPENROUTER_API_KEY_2);
-            console.log('✅ [4/6] Qwen responded!');
-            await pipeOpenRouter(orRes);
-            return;
-        } catch (err) { console.warn(`❌ [4/6] Qwen: ${err.message}`); }
-
-        // 5. Gemini direct  (text fallback — always agrees to plain text)
-        try {
-            console.log('[5/6] Gemini direct (text fallback)...');
+            console.log('[3/6] Gemini direct (text fallback)...');
             await streamGemini();
-            console.log('✅ [5/6] Gemini text fallback responded!');
+            console.log('✅ [3/6] Gemini text fallback responded!');
             return;
-        } catch (err) { console.warn(`❌ [5/6] Gemini: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [3/6] Gemini: ${err.message}`); }
 
-        // 6. Llama  (last resort)
-        try {
-            console.log('[6/6] meta-llama/llama-4-maverick:free  (last resort)...');
-            const orRes = await connectOpenRouter('meta-llama/llama-4-maverick:free', process.env.OPENROUTER_API_KEY);
-            console.log('✅ [6/6] Llama responded!');
-            await pipeOpenRouter(orRes);
-            return;
-        } catch (err) { console.warn(`❌ [6/6] Llama: ${err.message}`); }
+        // 4. OpenRouter Venice Fallbacks (Llama & Qwen - Venice is sometimes rate-limited)
+        for (const model of ['meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-next-80b-a3b-instruct:free', 'meta-llama/llama-3.2-3b-instruct:free']) {
+            try {
+                console.log(`[4/6] OpenRouter Venice ${model}...`);
+                const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
+                console.log(`✅ [4/6] OpenRouter Venice ${model} responded!`);
+                await pipeOpenRouter(orRes);
+                return;
+            } catch (err) { console.warn(`❌ [4/6] OpenRouter Venice ${model}: ${err.message}`); }
+        }
+
+        // 5. AgentRouter — DeepSeek (r1-0528 → v3.2 → v3.1)
+        for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
+            try {
+                console.log(`[5/6] AgentRouter / ${model}...`);
+                await streamAgentRouter(model);
+                console.log(`✅ [5/6] AgentRouter/${model} responded!`);
+                return;
+            } catch (err) { console.warn(`❌ [5/6] AgentRouter/${model}: ${err.message}`); }
+        }
 
         // All models exhausted
         res.write(`data: ${JSON.stringify({ error: 'All AI models are currently busy. Please try again in a moment.' })}\n\n`);
@@ -731,7 +985,7 @@ app.post('/api/whatsapp', async (req, res) => {
         }
 
         const postData = JSON.stringify({
-            model: "moonshotai/kimi-k2.6:free",
+            model: "google/gemma-4-31b-it:free",
             messages: [{ role: "user", content: incomingMsg }],
             stream: false
         });
