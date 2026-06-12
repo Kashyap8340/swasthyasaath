@@ -860,13 +860,13 @@
                     </div>
                 </div>
                 <!-- AI Message -->
-                <div class="flex items-end gap-3 max-w-[80%]">
+                <div class="flex items-end gap-2 sm:gap-3 max-w-[95%] sm:max-w-[80%]">
                     <div
-                        class="size-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0 mb-1">
-                        <span class="material-symbols-outlined text-lg">smart_toy</span>
+                        class="size-7 sm:size-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0 mb-1">
+                        <span class="material-symbols-outlined text-base sm:text-lg">smart_toy</span>
                     </div>
                     <div
-                        class="bg-white dark:bg-slate-800 p-5 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700">
+                        class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-0 break-words">
                         <p class="text-base leading-relaxed">Namaste! I am your SwasthyaSaathi AI health assistant. How can I help you
                             today? You can ask me about common illnesses, healthy habits, or nearest medical facilities.
                         </p>
@@ -1083,8 +1083,8 @@
                     </div>` : '';
 
                 const msgHTML = `
-            <div class="flex items-end gap-2 sm:gap-3 justify-end ml-auto max-w-[90%] sm:max-w-[80%]">
-                <div class="bg-primary text-white p-4 sm:p-5 rounded-2xl rounded-br-none shadow-md border border-primary">
+            <div class="flex items-end gap-2 sm:gap-3 justify-end ml-auto max-w-[95%] sm:max-w-[80%]">
+                <div class="bg-primary text-white p-4 sm:p-5 rounded-2xl rounded-br-none shadow-md border border-primary flex-1 min-w-0 break-words">
                     ${analysingBadge}
                     ${imagesHTML}
                     ${text ? `<p class="text-sm sm:text-base leading-relaxed">${text}</p>` : ''}
@@ -1119,8 +1119,8 @@
                 <div class="size-7 sm:size-8 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0 mb-1">
                     <span class="material-symbols-outlined text-base sm:text-lg">smart_toy</span>
                 </div>
-                <div class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700 w-full min-w-[200px]">
-                    <div class="text-sm sm:text-base leading-relaxed message-content prose prose-sm prose-slate dark:prose-invert max-w-none">
+                <div class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700 flex-1 min-w-0 break-words">
+                    <div class="text-sm sm:text-base leading-relaxed message-content prose prose-sm prose-slate dark:prose-invert max-w-none break-words overflow-hidden">
                         <div class="typing-indicator">
                             <div class="typing-dot"></div>
                             <div class="typing-dot"></div>
