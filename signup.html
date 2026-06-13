@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SwasthyaSaathi AI</title>
+    <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="bg-background-light font-sans text-foreground min-h-screen flex items-center justify-center p-4">
+    
+    <div class="max-w-5xl w-full bg-soft-clay rounded-[3rem] border border-border-color shadow-soft-lg overflow-hidden flex flex-col md:flex-row relative z-10">
+        
+        <!-- Left Side: Botanical Form -->
+        <div class="w-full md:w-1/2 p-10 lg:p-16 flex flex-col justify-center">
+            <a href="index.html" class="flex items-center gap-2 mb-12 w-max text-primary hover:text-foreground transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span class="text-sm font-bold uppercase tracking-widest">Back to Home</span>
+            </a>
+
+            <h1 class="text-4xl lg:text-5xl font-serif font-bold italic mb-4">Join Us</h1>
+            <p class="text-foreground/70 mb-10 text-lg">Create an account to start your personalized health journey.</p>
+
+            <form id="signupForm" class="space-y-6">
+                <div id="errorBox" class="hidden bg-terracotta/10 text-terracotta p-4 rounded-2xl text-sm border border-terracotta/20"></div>
+                <div id="successBox" class="hidden bg-green-100 text-green-700 p-4 rounded-2xl text-sm border border-green-200"></div>
+
+                <div id="step1">
+                    <div>
+                        <label class="block text-sm font-bold uppercase tracking-widest text-foreground/80 mb-2 mt-4">Full Name</label>
+                        <input type="text" id="fullName" required placeholder="Aarav Sharma"
+                            class="w-full bg-background-light border border-border-color rounded-full px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold uppercase tracking-widest text-foreground/80 mb-2 mt-4">Email Address</label>
+                        <input type="email" id="email" required placeholder="aarav@example.com"
+                            class="w-full bg-background-light border border-border-color rounded-full px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold uppercase tracking-widest text-foreground/80 mb-2 mt-4">Mobile Number</label>
+                        <input type="tel" id="mobile" required placeholder="9876543210" pattern="[0-9]{10}"
+                            class="w-full bg-background-light border border-border-color rounded-full px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold uppercase tracking-widest text-foreground/80 mb-2 mt-4">Password</label>
+                        <div class="relative">
+                            <input type="password" id="password" required placeholder="••••••••"
+                                class="w-full bg-background-light border border-border-color rounded-full px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground">
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/60 hover:text-primary transition-colors" onclick="togglePassword('password', 'eyeIcon1')">
+                                <span class="material-symbols-outlined" id="eyeIcon1">visibility</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-foreground/60 mt-2 ml-2">Must be at least 8 characters long, containing uppercase, lowercase, numbers, and symbols.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold uppercase tracking-widest text-foreground/80 mb-2 mt-4">Confirm Password</label>
+                        <div class="relative">
+                            <input type="password" id="confirmPassword" required placeholder="••••••••"
+                                class="w-full bg-background-light border border-border-color rounded-full px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground">
+                            <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/60 hover:text-primary transition-colors" onclick="togglePassword('confirmPassword', 'eyeIcon2')">
+                                <span class="material-symbols-outlined" id="eyeIcon2">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" id="sendOtpBtn"
+                        class="w-full bg-primary text-white font-bold uppercase tracking-widest py-4 rounded-full shadow-soft hover:shadow-soft-md hover:-translate-y-1 transition-all duration-300 mt-8 flex justify-center items-center gap-2">
+                        <span>Send OTP</span>
+                        <span class="material-symbols-outlined text-sm">mail</span>
+                    </button>
+                </div>
+
+                <div id="step2" class="hidden">
+                    <p class="text-center text-foreground/80 mb-6">We've sent a 6-digit OTP to your email. Please enter it below.</p>
+                    <div>
+                        <label class="block text-sm font-bold uppercase tracking-widest text-foreground/80 mb-2 text-center">Enter OTP</label>
+                        <input type="text" id="otp" placeholder="123456" maxlength="6"
+                            class="w-full bg-background-light border border-border-color rounded-full px-6 py-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground text-center text-2xl tracking-widest">
+                    </div>
+                    <button type="button" id="submitBtn"
+                        class="w-full bg-primary text-white font-bold uppercase tracking-widest py-4 rounded-full shadow-soft hover:shadow-soft-md hover:-translate-y-1 transition-all duration-300 mt-6 flex justify-center items-center gap-2">
+                        <span>Create Account</span>
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </button>
+                    <button type="button" id="backBtn"
+                        class="w-full bg-transparent text-primary font-bold uppercase tracking-widest py-4 rounded-full border border-primary hover:bg-primary/5 transition-all duration-300 mt-4 flex justify-center items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">arrow_back</span>
+                        <span>Back</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="relative mt-8">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-border-color"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-soft-clay text-foreground/60">Or continue with</span>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <div id="g_id_onload"
+                     data-client_id="330878158661-44c0s17o5ej04sf4a7hgfqhjgoid73j1.apps.googleusercontent.com"
+                     data-context="signup"
+                     data-ux_mode="popup"
+                     data-callback="handleGoogleCallback"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="pill"
+                     data-theme="outline"
+                     data-text="signup_with"
+                     data-size="large"
+                     data-logo_alignment="left">
+                </div>
+            </div>
+
+            <p class="mt-8 text-center text-foreground/60">
+                Already have an account? 
+                <a href="login.html" class="text-primary font-bold hover:underline">Log In</a>
+            </p>
+        </div>
+
+        <!-- Right Side: Image Arch -->
+        <div class="w-full md:w-1/2 bg-primary relative hidden md:block overflow-hidden p-6">
+            <div class="w-full h-full rounded-t-full rounded-b-[40px] overflow-hidden relative">
+                <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80" 
+                     alt="Nature" class="object-cover w-full h-full opacity-90 scale-105 hover:scale-100 transition-transform duration-[2000ms]">
+                <div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function handleGoogleCallback(response) {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.classList.add('hidden');
+            
+            try {
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Google signup failed');
+                
+                localStorage.setItem('swasthyasaathi_token', data.token);
+                localStorage.setItem('swasthyasaathi_user', JSON.stringify(data.user));
+                window.location.href = 'chat.html';
+                
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility';
+            }
+        }
+
+        const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+            const sendOtpBtn = document.getElementById('sendOtpBtn');
+            const errorBox = document.getElementById('errorBox');
+            const successBox = document.getElementById('successBox');
+            
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const mobile = document.getElementById('mobile').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Manual validation check to show HTML5 tooltips
+            const form = document.getElementById('signupForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Validation
+            if (!fullName || !email || !mobile || !password || !confirmPassword) {
+                errorBox.textContent = 'Please fill all fields';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            if (!strongPasswordRegex.test(password)) {
+                errorBox.textContent = 'Password must be at least 8 characters and include uppercase, lowercase, numbers, and symbols.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorBox.textContent = 'Passwords do not match.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            sendOtpBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+            sendOtpBtn.disabled = true;
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
+                
+                successBox.textContent = 'OTP sent successfully! Please check your email.';
+                successBox.classList.remove('hidden');
+                
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.classList.remove('hidden');
+            } finally {
+                sendOtpBtn.innerHTML = '<span>Send OTP</span><span class="material-symbols-outlined text-sm">mail</span>';
+                sendOtpBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('successBox').classList.add('hidden');
+            document.getElementById('errorBox').classList.add('hidden');
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const errorBox = document.getElementById('errorBox');
+            
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const mobile = document.getElementById('mobile').value;
+            const password = document.getElementById('password').value;
+            const otp = document.getElementById('otp').value;
+
+            if (!otp) {
+                errorBox.textContent = 'Please enter the OTP';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Processing...';
+            submitBtn.disabled = true;
+            errorBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, mobile, password, otp })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) throw new Error(data.error || 'Failed to sign up');
+                
+                // Store JWT token
+                localStorage.setItem('swasthyasaathi_token', data.token);
+                localStorage.setItem('swasthyasaathi_user', JSON.stringify(data.user));
+                
+                // Redirect to chat
+                window.location.href = 'chat.html';
+                
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.classList.remove('hidden');
+            } finally {
+                submitBtn.innerHTML = '<span>Create Account</span><span class="material-symbols-outlined text-sm">arrow_forward</span>';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

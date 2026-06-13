@@ -19,12 +19,19 @@
         }
     ],
     "routes": [
-        { "src": "/api/chat",        "dest": "server.js" },
-        { "src": "/api/tts",         "dest": "server.js" },
-        { "src": "/api/transcribe",  "dest": "server.js" },
-        { "src": "/api/reminder",    "dest": "server.js" },
-        { "src": "/api/places",      "dest": "server.js" },
-        { "src": "/api/whatsapp",    "dest": "server.js" },
-        { "src": "/(.*)",            "dest": "/$1" }
+        { "src": "/api/chat",               "dest": "server.js" },
+        { "src": "/api/tts",                "dest": "server.js" },
+        { "src": "/api/transcribe",         "dest": "server.js" },
+        { "src": "/api/reminder",           "dest": "server.js" },
+        { "src": "/api/places",             "dest": "server.js" },
+        { "src": "/api/whatsapp",           "dest": "server.js" },
+        { "src": "/api/twilio/sms",         "dest": "server.js" },
+        { "src": "/api/twilio/voice",       "dest": "server.js" },
+        { "src": "/api/twilio/voice/gather","dest": "server.js" },
+        { "src": "/api/signup",             "dest": "server.js" },
+        { "src": "/api/login",              "dest": "server.js" },
+        { "src": "/api/send-otp",           "dest": "server.js" },
+        { "src": "/api/auth/google",        "dest": "server.js" },
+        { "src": "/(.*)",                   "dest": "/$1" }
     ]
 }

@@ -24,45 +24,48 @@
         }
     </style>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 
 <body
-    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    class="bg-background-light text-foreground transition-colors duration-500">
     <!-- Sticky Navbar -->
     <header
-        class="sticky top-0 z-50 w-full bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        class="sticky top-0 z-50 w-full bg-background-light/80 backdrop-blur-md border-b border-border-color">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='index.html'">
-                    <div class="bg-primary p-2 rounded-lg text-white">
+                    <div class="bg-primary p-2 rounded-full text-background-light">
                         <span class="material-symbols-outlined text-2xl">health_and_safety</span>
                     </div>
-                    <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">SwasthyaSaathi
-                        <span class="text-primary">AI</span></span>
+                    <span class="text-2xl font-serif font-bold tracking-tight text-foreground">SwasthyaSaathi
+                        <span class="text-primary italic">AI</span></span>
                 </div>
                 <nav class="hidden lg:flex items-center gap-8">
-                    <a class="text-sm font-semibold hover:text-primary transition-colors" href="index.html">Home</a>
-                    <a class="text-sm font-semibold hover:text-primary transition-colors" href="about.html">About</a>
-                    <a class="text-sm font-semibold hover:text-primary transition-colors" href="awareness.html">Health
+                    <a class="text-sm font-semibold hover:text-primary transition-colors duration-300" href="index.html">Home</a>
+                    <a class="text-sm font-semibold hover:text-primary transition-colors duration-300" href="about.html">About</a>
+                    <a class="text-sm font-semibold hover:text-primary transition-colors duration-300" href="awareness.html">Health
                         Awareness</a>
-                    <a class="text-sm font-semibold hover:text-primary transition-colors" href="alerts.html">Outbreak
+                    <a class="text-sm font-semibold hover:text-primary transition-colors duration-300" href="alerts.html">Outbreak
                         Alerts</a>
-                    <a class="text-sm font-semibold hover:text-primary transition-colors"
+                    <a class="text-sm font-semibold hover:text-primary transition-colors duration-300"
                         href="reminders.html">Reminders</a>
-                    <a class="flex items-center gap-1 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold hover:bg-primary/20 transition-colors"
+                    <a class="flex items-center gap-1 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold hover:bg-primary/20 transition-colors duration-300"
                         href="chat.html">
                         <span class="material-symbols-outlined text-sm">chat_bubble</span> AI Chat
                     </a>
                 </nav>
                 <div class="flex items-center gap-3">
-                    <button
-                        class="hidden sm:block px-5 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary">Login</button>
-                    <button
-                        class="hidden sm:block px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">Sign
-                        Up</button>
+                    <div id="desktopAuthContainer" class="hidden sm:flex items-center gap-3">
+                        <button onclick="window.location.href='login.html'"
+                            class="px-5 py-2.5 text-sm font-bold text-foreground/80 hover:text-primary duration-300 cursor-pointer">Login</button>
+                        <button onclick="window.location.href='signup.html'"
+                            class="px-6 py-2.5 bg-primary text-white text-sm font-bold rounded-full hover:bg-primary/90 transition-all duration-300 cursor-pointer">Sign
+                            Up</button>
+                    </div>
                     <!-- Mobile Menu Button -->
                     <button id="mobileMenuBtn"
-                        class="lg:hidden p-2 -mr-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        class="lg:hidden p-2 -mr-2 text-foreground hover:bg-soft-clay rounded-full transition-colors duration-300">
                         <span class="material-symbols-outlined">menu</span>
                     </button>
                 </div>
@@ -72,57 +75,56 @@
     <main>
         <!-- Hero Section -->
         <section
-            class="relative overflow-hidden pt-16 pb-24 lg:pt-32 lg:pb-40 bg-gradient-to-b from-primary/5 via-transparent to-transparent">
+            class="relative overflow-hidden pt-24 pb-32 lg:pt-40 lg:pb-48 bg-gradient-to-b from-primary/5 via-transparent to-transparent">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
-                    <div class="space-y-8">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <div class="space-y-10">
                         <div
-                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-bold uppercase tracking-wider">
-                            <span class="material-symbols-outlined text-sm">verified_user</span> Government Trusted
-                            Initiative
+                            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/30 text-foreground text-xs font-bold uppercase tracking-widest border border-border-color">
+                            <span class="material-symbols-outlined text-sm text-primary">verified_user</span> Government Trusted
                         </div>
                         <h1
-                            class="text-5xl lg:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight">
-                            AI-Powered <span class="text-primary">Public Health</span> Companion
+                            class="text-6xl lg:text-8xl font-serif font-bold text-foreground leading-[1.1] tracking-tight">
+                            AI-Powered <br><span class="text-primary italic">Public Health</span> Companion
                         </h1>
-                        <p class="text-lg lg:text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
+                        <p class="text-lg lg:text-xl text-foreground/70 leading-relaxed max-w-xl font-sans">
                             Helping communities access reliable healthcare awareness through intuitive AI conversations.
                             Bridging the gap between medical knowledge and public safety.
                         </p>
-                        <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex flex-col sm:flex-row gap-6 pt-4">
                             <a href="chat.html"
-                                class="flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white rounded-xl text-lg font-bold shadow-xl shadow-primary/25 hover:translate-y-[-2px] transition-transform cursor-pointer">
-                                <span class="material-symbols-outlined">forum</span> Start Chat with SwasthyaSaathi AI
+                                class="flex items-center justify-center gap-2 px-8 py-4 bg-primary text-white rounded-full text-sm uppercase tracking-widest font-bold shadow-soft-lg hover:-translate-y-1 hover:bg-opacity-90 transition-all duration-300 cursor-pointer">
+                                <span class="material-symbols-outlined">forum</span> Start Chat
                             </a>
                             <button
-                                class="flex items-center justify-center gap-2 px-8 py-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                                Explore Health Information
+                                class="flex items-center justify-center gap-2 px-8 py-4 border border-primary text-primary rounded-full text-sm uppercase tracking-widest font-bold hover:bg-primary/5 transition-all duration-300">
+                                Explore Info
                             </button>
                         </div>
-                        <div class="flex items-center gap-6 pt-4 grayscale opacity-60">
-                            <span class="material-symbols-outlined text-4xl">favorite</span>
-                            <span class="material-symbols-outlined text-4xl">shield_with_heart</span>
-                            <span class="material-symbols-outlined text-4xl">medical_services</span>
+                        <div class="flex items-center gap-8 pt-8 opacity-60">
+                            <span class="material-symbols-outlined text-4xl text-primary font-light">local_florist</span>
+                            <span class="material-symbols-outlined text-4xl text-primary font-light">spa</span>
+                            <span class="material-symbols-outlined text-4xl text-primary font-light">eco</span>
                         </div>
                     </div>
-                    <div class="relative">
+                    <div class="relative group">
                         <div class="absolute -top-20 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
                         <div
-                            class="relative bg-white dark:bg-slate-800 p-4 rounded-[2rem] shadow-2xl border border-slate-100 dark:border-slate-700">
+                            class="relative bg-soft-clay p-3 rounded-t-full rounded-b-[40px] shadow-soft-xl border border-border-color transition-transform duration-700 hover:scale-105">
                             <img alt="AI Healthcare Assistant Illustration"
-                                class="rounded-[1.5rem] w-full h-[500px] object-cover"
+                                class="rounded-t-full rounded-b-[36px] w-full aspect-[3/4] md:aspect-square object-cover"
                                 data-alt="Modern healthcare digital assistant showing heart health data"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFueNEGErclpMNfr0dRSDRfiYhLrNcr4WtwUpuuxGYQDPgak6l7EnbwbT361aKwijXPd60qZOb7u4Hju1XVVlD3Ccqd3A36v5vQlTU2YR-nsMarNshy9u7SxBHcEOgv3i6GVgT2x6tXSatRbtiV1TLyTSK-YfiA3go7LaaKnRPAlSWp97wl7KNuNPMIoTqIB_tLaP457KKcWlUf6JTFaO39VGviNkabORE3sNayMmwbsGLqWRfzxh0S2vQ_iDLuB8KKjviQglu2mM" />
                             <div
-                                class="absolute bottom-10 -left-8 bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-xl border border-slate-50 dark:border-slate-700 max-w-[200px]">
-                                <div class="flex items-center gap-3 mb-2">
+                                class="absolute bottom-12 -left-6 bg-background-light/90 backdrop-blur-sm p-6 rounded-3xl shadow-soft-lg border border-border-color max-w-[220px]">
+                                <div class="flex items-center gap-4 mb-3">
                                     <div
-                                        class="size-8 rounded-full bg-secondary flex items-center justify-center text-white">
-                                        <span class="material-symbols-outlined text-sm">check</span>
+                                        class="size-10 rounded-full bg-secondary flex items-center justify-center text-foreground">
+                                        <span class="material-symbols-outlined text-base">check</span>
                                     </div>
-                                    <span class="text-xs font-bold">Vaccine Reminder</span>
+                                    <span class="text-sm font-serif font-bold">Vaccine Reminder</span>
                                 </div>
-                                <p class="text-[10px] text-slate-500">Your scheduled polio dose is due in 2 days.</p>
+                                <p class="text-xs text-foreground/70 leading-relaxed">Your scheduled polio dose is due in 2 days.</p>
                             </div>
                         </div>
                     </div>
@@ -130,302 +132,305 @@
             </div>
         </section>
         <!-- Problem & Solution -->
-        <section class="py-24 bg-white dark:bg-slate-900">
+        <!-- Problem & Solution -->
+        <section class="py-32 bg-background-light">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <h2 class="text-3xl lg:text-4xl font-black mb-4">Bridging the Gap in Healthcare</h2>
-                    <p class="text-slate-600 dark:text-slate-400">We solve critical public health challenges using
+                <div class="text-center max-w-3xl mx-auto mb-20">
+                    <h2 class="text-4xl lg:text-5xl font-serif font-bold mb-6 italic">Bridging the Gap in Healthcare</h2>
+                    <p class="text-foreground/70 text-lg">We solve critical public health challenges using
                         smart, accessible technology.</p>
                 </div>
-                <div class="grid md:grid-cols-3 gap-8">
+                <div class="grid md:grid-cols-3 gap-12">
                     <div
-                        class="p-8 rounded-3xl bg-background-light dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-colors">
-                        <div class="size-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-3xl">error_outline</span>
+                        class="p-10 rounded-3xl bg-soft-clay hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500">
+                        <div class="size-16 bg-background-light rounded-full flex items-center justify-center mb-8 shadow-soft">
+                            <span class="material-symbols-outlined text-3xl text-terracotta">error_outline</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Lack of Awareness</h3>
-                        <p class="text-slate-600 dark:text-slate-400">Providing instant, evidence-based medical
+                        <h3 class="text-2xl font-serif font-bold mb-4">Lack of Awareness</h3>
+                        <p class="text-foreground/70 leading-relaxed">Providing instant, evidence-based medical
                             knowledge to those in remote areas without internet access.</p>
                     </div>
                     <div
-                        class="p-8 rounded-3xl bg-background-light dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-colors">
+                        class="p-10 rounded-3xl bg-soft-clay md:translate-y-12 hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500">
                         <div
-                            class="size-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-3xl">language</span>
+                            class="size-16 bg-background-light rounded-full flex items-center justify-center mb-8 shadow-soft">
+                            <span class="material-symbols-outlined text-3xl text-primary">language</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Language Barriers</h3>
-                        <p class="text-slate-600 dark:text-slate-400">Multilingual AI guidance that speaks 15+ local
+                        <h3 class="text-2xl font-serif font-bold mb-4">Language Barriers</h3>
+                        <p class="text-foreground/70 leading-relaxed">Multilingual AI guidance that speaks 15+ local
                             languages, ensuring no one is left behind.</p>
                     </div>
                     <div
-                        class="p-8 rounded-3xl bg-background-light dark:bg-slate-800 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-colors">
+                        class="p-10 rounded-3xl bg-soft-clay hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500">
                         <div
-                            class="size-14 bg-secondary/10 text-secondary rounded-2xl flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-3xl">notifications_active</span>
+                            class="size-16 bg-background-light rounded-full flex items-center justify-center mb-8 shadow-soft">
+                            <span class="material-symbols-outlined text-3xl text-terracotta">notifications_active</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3">Missed Vaccines</h3>
-                        <p class="text-slate-600 dark:text-slate-400">Automated SMS and WhatsApp alerts for immunization
+                        <h3 class="text-2xl font-serif font-bold mb-4">Missed Vaccines</h3>
+                        <p class="text-foreground/70 leading-relaxed">Automated SMS and WhatsApp alerts for immunization
                             schedules and medicine doses.</p>
                     </div>
                 </div>
             </div>
         </section>
         <!-- Key Features -->
-        <section class="py-24 bg-background-light dark:bg-background-dark">
+        <!-- Key Features -->
+        <section class="py-32 bg-background-light">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-6">
                     <div class="max-w-xl">
-                        <h2 class="text-4xl font-black mb-4">Empowering Communities with Smart Health Tools</h2>
-                        <p class="text-slate-600 dark:text-slate-400 text-lg">Our platform is designed to be accessible,
+                        <h2 class="text-4xl lg:text-5xl font-serif font-bold mb-6 italic">Empowering Communities</h2>
+                        <p class="text-foreground/70 text-lg">Our platform is designed to be accessible,
                             reliable, and available 24/7 across multiple devices.</p>
                     </div>
                     <button
-                        class="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold">View
+                        class="px-8 py-4 bg-foreground text-background-light rounded-full font-bold uppercase tracking-widest text-sm hover:bg-foreground/90 transition-all duration-300">View
                         All Features</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-14 pb-12">
                     <div
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all">
+                        class="group bg-background-light p-10 rounded-3xl border border-border-color hover:shadow-soft-lg hover:-translate-y-2 transition-all duration-500">
                         <div
-                            class="size-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined">chat</span>
+                            class="size-14 bg-soft-clay rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                            <span class="material-symbols-outlined text-primary font-light">chat</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Multilingual AI Chatbot</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Talk to our AI in your local language. Natural,
+                        <h3 class="text-2xl font-serif font-bold mb-4">Multilingual AI</h3>
+                        <p class="text-foreground/70 leading-relaxed">Talk to our AI in your local language. Natural,
                             easy, and smart conversation.</p>
                     </div>
                     <div
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all">
+                        class="group bg-background-light p-10 rounded-3xl border border-border-color hover:shadow-soft-lg md:translate-y-12 hover:md:translate-y-10 transition-all duration-500">
                         <div
-                            class="size-12 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined">stethoscope</span>
+                            class="size-14 bg-soft-clay rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                            <span class="material-symbols-outlined text-primary font-light">stethoscope</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Disease Guidance</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Step-by-step guidance for managing common symptoms
+                        <h3 class="text-2xl font-serif font-bold mb-4">Disease Guidance</h3>
+                        <p class="text-foreground/70 leading-relaxed">Step-by-step guidance for managing common symptoms
                             and knowing when to see a doctor.</p>
                     </div>
                     <div
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all">
+                        class="group bg-background-light p-10 rounded-3xl border border-border-color hover:shadow-soft-lg hover:-translate-y-2 transition-all duration-500">
                         <div
-                            class="size-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined">warning</span>
+                            class="size-14 bg-soft-clay rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                            <span class="material-symbols-outlined text-terracotta font-light">warning</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Real-Time Alerts</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Stay informed about local disease outbreaks and
+                        <h3 class="text-2xl font-serif font-bold mb-4">Real-Time Alerts</h3>
+                        <p class="text-foreground/70 leading-relaxed">Stay informed about local disease outbreaks and
                             emergency health advisories.</p>
                     </div>
                     <div
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all">
+                        class="group bg-background-light p-10 rounded-3xl border border-border-color hover:shadow-soft-lg md:translate-y-12 lg:translate-y-0 hover:-translate-y-2 hover:md:translate-y-10 hover:lg:-translate-y-2 transition-all duration-500">
                         <div
-                            class="size-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined">alarm</span>
+                            class="size-14 bg-soft-clay rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                            <span class="material-symbols-outlined text-primary font-light">alarm</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Reminders</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Never miss a vaccine dose or medical checkup with
+                        <h3 class="text-2xl font-serif font-bold mb-4">Reminders</h3>
+                        <p class="text-foreground/70 leading-relaxed">Never miss a vaccine dose or medical checkup with
                             automated personalized reminders.</p>
                     </div>
                     <div
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all">
+                        class="group bg-background-light p-10 rounded-3xl border border-border-color hover:shadow-soft-lg lg:translate-y-12 hover:-translate-y-2 hover:lg:translate-y-10 transition-all duration-500">
                         <div
-                            class="size-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined">devices</span>
+                            class="size-14 bg-soft-clay rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                            <span class="material-symbols-outlined text-primary font-light">devices</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Multi-platform Access</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Seamlessly access our services via Web, WhatsApp,
+                        <h3 class="text-2xl font-serif font-bold mb-4">Multi-platform</h3>
+                        <p class="text-foreground/70 leading-relaxed">Seamlessly access our services via Web, WhatsApp,
                             or even simple SMS for feature phones.</p>
                     </div>
                     <div
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-all">
+                        class="group bg-background-light p-10 rounded-3xl border border-border-color hover:shadow-soft-lg md:translate-y-12 lg:translate-y-0 hover:-translate-y-2 hover:md:translate-y-10 hover:lg:-translate-y-2 transition-all duration-500">
                         <div
-                            class="size-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined">shield</span>
+                            class="size-14 bg-soft-clay rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
+                            <span class="material-symbols-outlined text-primary font-light">shield</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-2">Privacy Protected</h3>
-                        <p class="text-slate-500 dark:text-slate-400">Your health data is encrypted and managed
+                        <h3 class="text-2xl font-serif font-bold mb-4">Privacy Protected</h3>
+                        <p class="text-foreground/70 leading-relaxed">Your health data is encrypted and managed
                             according to national health standards.</p>
                     </div>
                 </div>
             </div>
         </section>
         <!-- How It Works -->
-        <section class="py-24 bg-white dark:bg-slate-900">
+        <!-- How It Works -->
+        <section class="py-32 bg-soft-clay rounded-[3rem] mx-4 sm:mx-6 lg:mx-8 my-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-4xl font-black mb-16">Simple 4-Step Journey</h2>
+                <h2 class="text-4xl lg:text-5xl font-serif font-bold mb-20 italic text-foreground">Simple 4-Step Journey</h2>
                 <div class="relative grid md:grid-cols-4 gap-12">
                     <!-- Connector line for desktop -->
                     <div
-                        class="hidden md:block absolute top-12 left-0 w-full h-0.5 bg-slate-100 dark:bg-slate-800 -z-10">
+                        class="hidden md:block absolute top-12 left-0 w-full h-px bg-border-color -z-10">
                     </div>
                     <div class="flex flex-col items-center">
                         <div
-                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-black border-8 border-white dark:border-slate-900 shadow-xl mb-6">
+                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-serif italic border-[10px] border-soft-clay shadow-sm mb-6">
                             1</div>
-                        <h4 class="text-xl font-bold mb-2">Ask</h4>
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">Ask your health query in any language</p>
+                        <h4 class="text-2xl font-serif font-bold mb-3">Ask</h4>
+                        <p class="text-foreground/70 text-sm leading-relaxed max-w-[200px]">Ask your health query in any language</p>
                     </div>
                     <div class="flex flex-col items-center">
                         <div
-                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-black border-8 border-white dark:border-slate-900 shadow-xl mb-6">
+                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-serif italic border-[10px] border-soft-clay shadow-sm mb-6">
                             2</div>
-                        <h4 class="text-xl font-bold mb-2">Guidance</h4>
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">Receive instant AI-driven medical guidance
+                        <h4 class="text-2xl font-serif font-bold mb-3">Guidance</h4>
+                        <p class="text-foreground/70 text-sm leading-relaxed max-w-[200px]">Receive instant AI-driven medical guidance
                         </p>
                     </div>
                     <div class="flex flex-col items-center">
                         <div
-                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-black border-8 border-white dark:border-slate-900 shadow-xl mb-6">
+                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-serif italic border-[10px] border-soft-clay shadow-sm mb-6">
                             3</div>
-                        <h4 class="text-xl font-bold mb-2">Reminders</h4>
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">Set automated alerts for future care</p>
+                        <h4 class="text-2xl font-serif font-bold mb-3">Reminders</h4>
+                        <p class="text-foreground/70 text-sm leading-relaxed max-w-[200px]">Set automated alerts for future care</p>
                     </div>
                     <div class="flex flex-col items-center">
                         <div
-                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-black border-8 border-white dark:border-slate-900 shadow-xl mb-6">
+                            class="size-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-serif italic border-[10px] border-soft-clay shadow-sm mb-6">
                             4</div>
-                        <h4 class="text-xl font-bold mb-2">Consult</h4>
-                        <p class="text-slate-500 dark:text-slate-400 text-sm">Get connected to local facilities if
+                        <h4 class="text-2xl font-serif font-bold mb-3">Consult</h4>
+                        <p class="text-foreground/70 text-sm leading-relaxed max-w-[200px]">Get connected to local facilities if
                             needed</p>
                     </div>
                 </div>
             </div>
         </section>
         <!-- Multi-Platform -->
-        <section class="py-24 bg-background-light dark:bg-background-dark overflow-hidden">
+        <section class="py-32 bg-background-light overflow-hidden">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl font-black mb-4">Access Everywhere</h2>
-                    <p class="text-slate-600 dark:text-slate-400">Choose the way you want to communicate with us.</p>
+                <div class="text-center mb-20">
+                    <h2 class="text-4xl lg:text-5xl font-serif font-bold mb-6 italic">Access Everywhere</h2>
+                    <p class="text-foreground/70 text-lg">Choose the way you want to communicate with us.</p>
                 </div>
-                <div class="grid md:grid-cols-3 gap-8">
+                <div class="grid md:grid-cols-3 gap-10">
                     <!-- Web Card -->
                     <div
-                        class="relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-xl group">
-                        <div class="flex justify-between items-start mb-8">
-                            <span class="material-symbols-outlined text-4xl text-primary">public</span>
+                        class="relative bg-soft-clay rounded-[3rem] p-10 border border-border-color shadow-soft hover:shadow-soft-lg hover:-translate-y-2 transition-all duration-500 group">
+                        <div class="flex justify-between items-start mb-10">
+                            <span class="material-symbols-outlined text-4xl text-primary font-light">public</span>
                             <span
-                                class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-full">RECOMMENDED</span>
+                                class="px-4 py-1.5 bg-primary/20 text-foreground text-[10px] uppercase tracking-widest font-bold rounded-full">RECOMMENDED</span>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4">Web Application</h3>
+                        <h3 class="text-2xl font-serif font-bold mb-4">Web Application</h3>
                         <div
-                            class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 mb-6 border border-slate-100 dark:border-slate-700">
-                            <div class="flex gap-2 items-start mb-3">
-                                <div class="size-6 bg-primary rounded-full flex-shrink-0"></div>
-                                <div class="bg-primary/10 p-2 rounded-lg text-[10px]">How can I help you today?</div>
+                            class="bg-background-light rounded-2xl p-6 mb-8 border border-border-color shadow-sm">
+                            <div class="flex gap-3 items-start mb-4">
+                                <div class="size-8 bg-primary rounded-full flex-shrink-0"></div>
+                                <div class="bg-soft-clay p-3 rounded-2xl text-xs font-sans">How can I help you today?</div>
                             </div>
-                            <div class="flex gap-2 items-start justify-end">
-                                <div class="bg-slate-200 dark:bg-slate-700 p-2 rounded-lg text-[10px]">Tell me about UTI
+                            <div class="flex gap-3 items-start justify-end">
+                                <div class="bg-primary/10 p-3 rounded-2xl text-xs font-sans">Tell me about UTI
                                     symptoms.</div>
-                                <div class="size-6 bg-slate-300 dark:bg-slate-600 rounded-full flex-shrink-0"></div>
+                                <div class="size-8 bg-foreground/20 rounded-full flex-shrink-0"></div>
                             </div>
                         </div>
                         <button onclick="window.location.href='chat.html'"
-                            class="w-full py-3 bg-primary text-white rounded-xl font-bold group-hover:shadow-lg transition-all cursor-pointer">Open
+                            class="w-full py-4 bg-primary text-white rounded-full text-sm font-bold uppercase tracking-widest group-hover:bg-opacity-90 transition-all duration-300 cursor-pointer">Open
                             Web App</button>
                     </div>
                     <!-- WhatsApp Card -->
                     <div
-                        class="relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-xl group">
-                        <div class="flex justify-between items-start mb-8">
-                            <span class="material-symbols-outlined text-4xl text-[#25D366]">chat</span>
+                        class="relative bg-soft-clay rounded-[3rem] p-10 border border-border-color shadow-soft hover:shadow-soft-lg hover:-translate-y-2 transition-all duration-500 group">
+                        <div class="flex justify-between items-start mb-10">
+                            <span class="material-symbols-outlined text-4xl text-[#25D366] font-light">chat</span>
                             <span
-                                class="px-3 py-1 bg-[#25D366]/10 text-[#25D366] text-[10px] font-bold rounded-full">EASIEST</span>
+                                class="px-4 py-1.5 bg-[#25D366]/20 text-foreground text-[10px] uppercase tracking-widest font-bold rounded-full">EASIEST</span>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4">WhatsApp AI</h3>
+                        <h3 class="text-2xl font-serif font-bold mb-4">WhatsApp AI</h3>
                         <div
-                            class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 mb-6 border border-slate-100 dark:border-slate-700">
-                            <div class="flex gap-2 items-start mb-3">
-                                <div class="size-6 bg-[#25D366] rounded-full flex-shrink-0"></div>
-                                <div class="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg text-[10px]">Type 'HI' to
+                            class="bg-background-light rounded-2xl p-6 mb-8 border border-border-color shadow-sm">
+                            <div class="flex gap-3 items-start mb-4">
+                                <div class="size-8 bg-[#25D366] rounded-full flex-shrink-0"></div>
+                                <div class="bg-soft-clay p-3 rounded-2xl text-xs font-sans">Type 'HI' to
                                     start chatting.</div>
                             </div>
-                            <div class="flex gap-2 items-start justify-end">
+                            <div class="flex gap-3 items-start justify-end">
                                 <div
-                                    class="bg-[#dcf8c6] dark:bg-emerald-900 p-2 rounded-lg text-[10px] text-slate-900 dark:text-slate-100">
+                                    class="bg-[#25D366]/20 p-3 rounded-2xl text-xs font-sans text-foreground">
                                     HI</div>
-                                <div class="size-6 bg-slate-300 dark:bg-slate-600 rounded-full flex-shrink-0"></div>
+                                <div class="size-8 bg-foreground/20 rounded-full flex-shrink-0"></div>
                             </div>
                         </div>
                         <button onclick="window.open('https://wa.me/14155238886?text=join%20row-seldom','_blank')"
-                            class="w-full py-3 bg-[#25D366] text-white rounded-xl font-bold group-hover:shadow-lg transition-all cursor-pointer">Chat
+                            class="w-full py-4 bg-[#25D366] text-white rounded-full text-sm font-bold uppercase tracking-widest group-hover:bg-opacity-90 transition-all duration-300 cursor-pointer">Chat
                             with AI</button>
                     </div>
                     <!-- SMS Card -->
                     <div
-                        class="relative bg-white dark:bg-slate-800 rounded-[2.5rem] p-8 border border-slate-200 dark:border-slate-700 shadow-xl group">
-                        <div class="flex justify-between items-start mb-8">
-                            <span class="material-symbols-outlined text-4xl text-orange-500">sms</span>
+                        class="relative bg-soft-clay rounded-[3rem] p-10 border border-border-color shadow-soft hover:shadow-soft-lg hover:-translate-y-2 transition-all duration-500 group">
+                        <div class="flex justify-between items-start mb-10">
+                            <span class="material-symbols-outlined text-4xl text-terracotta font-light">sms</span>
                             <span
-                                class="px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-bold rounded-full">OFFLINE</span>
+                                class="px-4 py-1.5 bg-terracotta/20 text-foreground text-[10px] uppercase tracking-widest font-bold rounded-full">OFFLINE</span>
                         </div>
-                        <h3 class="text-2xl font-bold mb-4">SMS Alerts</h3>
+                        <h3 class="text-2xl font-serif font-bold mb-4">SMS Alerts</h3>
                         <div
-                            class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4 mb-6 border border-slate-100 dark:border-slate-700">
-                            <div class="flex gap-2 items-start mb-3">
-                                <div class="size-6 bg-orange-500 rounded-full flex-shrink-0"></div>
-                                <div class="bg-slate-100 dark:bg-slate-800 p-2 rounded-lg text-[10px] italic">SMS:
+                            class="bg-background-light rounded-2xl p-6 mb-8 border border-border-color shadow-sm">
+                            <div class="flex gap-3 items-start mb-4">
+                                <div class="size-8 bg-terracotta rounded-full flex-shrink-0"></div>
+                                <div class="bg-soft-clay p-3 rounded-2xl text-xs italic font-serif">SMS:
                                     Alert! Fever cases rising in your area.</div>
                             </div>
                         </div>
                         <button
-                            class="w-full py-3 bg-slate-900 dark:bg-slate-700 text-white rounded-xl font-bold group-hover:shadow-lg transition-all">Subscribe
+                            class="w-full py-4 bg-foreground text-background-light rounded-full text-sm font-bold uppercase tracking-widest group-hover:bg-opacity-90 transition-all duration-300">Subscribe
                             to SMS</button>
                     </div>
                 </div>
             </div>
         </section>
         <!-- Awareness Topics -->
-        <section class="py-24 bg-white dark:bg-slate-900">
+        <section class="py-32 bg-background-light">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center mb-12">
-                    <h2 class="text-3xl font-black">Popular Health Topics</h2>
-                    <a class="text-primary font-bold hover:underline" href="#">Explore all topics →</a>
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+                    <h2 class="text-4xl lg:text-5xl font-serif font-bold italic">Popular Topics</h2>
+                    <a class="text-primary font-bold hover:underline uppercase tracking-widest text-sm" href="#">Explore all topics →</a>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
                     <div
-                        class="group cursor-pointer bg-background-light dark:bg-slate-800 p-6 rounded-3xl text-center hover:bg-primary hover:text-white transition-all">
+                        class="group cursor-pointer bg-soft-clay p-8 rounded-[2.5rem] border border-border-color text-center hover:bg-primary hover:text-white hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500">
                         <span
-                            class="material-symbols-outlined text-4xl mb-4 group-hover:scale-110 transition-transform">neurology</span>
-                        <p class="font-bold">Dementia</p>
+                            class="material-symbols-outlined text-4xl mb-4 text-primary group-hover:text-white font-light transition-colors duration-500">neurology</span>
+                        <p class="font-bold font-serif text-lg">Dementia</p>
                     </div>
                     <div
-                        class="group cursor-pointer bg-background-light dark:bg-slate-800 p-6 rounded-3xl text-center hover:bg-primary hover:text-white transition-all">
+                        class="group cursor-pointer bg-soft-clay p-8 rounded-[2.5rem] border border-border-color text-center hover:bg-primary hover:text-white hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500 md:translate-y-8">
                         <span
-                            class="material-symbols-outlined text-4xl mb-4 group-hover:scale-110 transition-transform">water_drop</span>
-                        <p class="font-bold">UTI</p>
+                            class="material-symbols-outlined text-4xl mb-4 text-primary group-hover:text-white font-light transition-colors duration-500">water_drop</span>
+                        <p class="font-bold font-serif text-lg">UTI</p>
                     </div>
                     <div
-                        class="group cursor-pointer bg-background-light dark:bg-slate-800 p-6 rounded-3xl text-center hover:bg-primary hover:text-white transition-all">
+                        class="group cursor-pointer bg-soft-clay p-8 rounded-[2.5rem] border border-border-color text-center hover:bg-primary hover:text-white hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500">
                         <span
-                            class="material-symbols-outlined text-4xl mb-4 group-hover:scale-110 transition-transform">thermometer</span>
-                        <p class="font-bold">Viral Fever</p>
+                            class="material-symbols-outlined text-4xl mb-4 text-primary group-hover:text-white font-light transition-colors duration-500">thermometer</span>
+                        <p class="font-bold font-serif text-lg">Viral Fever</p>
                     </div>
                     <div
-                        class="group cursor-pointer bg-background-light dark:bg-slate-800 p-6 rounded-3xl text-center hover:bg-primary hover:text-white transition-all">
+                        class="group cursor-pointer bg-soft-clay p-8 rounded-[2.5rem] border border-border-color text-center hover:bg-primary hover:text-white hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500 md:translate-y-8">
                         <span
-                            class="material-symbols-outlined text-4xl mb-4 group-hover:scale-110 transition-transform">bug_report</span>
-                        <p class="font-bold">Dengue</p>
+                            class="material-symbols-outlined text-4xl mb-4 text-primary group-hover:text-white font-light transition-colors duration-500">bug_report</span>
+                        <p class="font-bold font-serif text-lg">Dengue</p>
                     </div>
                     <div
-                        class="group cursor-pointer bg-background-light dark:bg-slate-800 p-6 rounded-3xl text-center hover:bg-primary hover:text-white transition-all">
+                        class="group cursor-pointer bg-soft-clay p-8 rounded-[2.5rem] border border-border-color text-center hover:bg-primary hover:text-white hover:-translate-y-2 hover:shadow-soft-md transition-all duration-500">
                         <span
-                            class="material-symbols-outlined text-4xl mb-4 group-hover:scale-110 transition-transform">vaccines</span>
-                        <p class="font-bold">Vaccination</p>
+                            class="material-symbols-outlined text-4xl mb-4 text-primary group-hover:text-white font-light transition-colors duration-500">vaccines</span>
+                        <p class="font-bold font-serif text-lg">Vaccination</p>
                     </div>
                 </div>
             </div>
         </section>
         <!-- Final CTA -->
-        <section class="py-20 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-5xl mx-auto bg-primary rounded-[3rem] p-12 lg:p-20 text-center relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-                <div class="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
-                <h2 class="text-4xl lg:text-5xl font-black text-white mb-6">Start Your Health Awareness Journey Today
+        <section class="py-32 px-4 sm:px-6 lg:px-8 bg-background-light">
+            <div class="max-w-5xl mx-auto bg-primary rounded-t-full rounded-b-[4rem] p-16 lg:p-24 text-center relative overflow-hidden shadow-soft-xl border border-border-color">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-background-light/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-foreground/10 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+                <h2 class="text-5xl lg:text-7xl font-serif font-bold text-white mb-8 italic leading-tight">Start Your Health <br>Journey Today
                 </h2>
-                <p class="text-white/80 text-lg lg:text-xl mb-10 max-w-2xl mx-auto">Join thousands of others in making
-                    informed health decisions with the help of SwasthyaSaathi AI.</p>
+                <p class="text-white/80 text-lg lg:text-xl mb-12 max-w-2xl mx-auto font-sans leading-relaxed">Join thousands of others in making
+                    informed health decisions with the calming guidance of SwasthyaSaathi AI.</p>
                 <a href="chat.html"
-                    class="inline-block px-10 py-5 bg-white text-primary rounded-2xl text-xl font-black shadow-2xl hover:scale-105 transition-transform cursor-pointer">
-                    Chat with SwasthyaSaathi AI
+                    class="inline-block px-10 py-5 bg-background-light text-primary rounded-full text-sm font-bold uppercase tracking-widest shadow-soft-md hover:-translate-y-1 hover:shadow-soft-lg transition-all duration-500 cursor-pointer">
+                    Chat with SwasthyaSaathi
                 </a>
             </div>
         </section>
@@ -540,11 +545,11 @@
                 href="chat.html">
                 <span class="material-symbols-outlined">chat_bubble</span> AI Chat
             </a>
-            <div class="flex flex-col gap-3 mt-auto pt-6">
-                <button
-                    class="w-full py-3 text-sm font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl">Login</button>
-                <button
-                    class="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20">Sign
+            <div id="mobileAuthContainer" class="flex flex-col gap-3 mt-auto pt-6">
+                <button onclick="window.location.href='login.html'"
+                    class="w-full py-3 text-sm font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer">Login</button>
+                <button onclick="window.location.href='signup.html'"
+                    class="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 cursor-pointer">Sign
                     Up</button>
             </div>
         </div>

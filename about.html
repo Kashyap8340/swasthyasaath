@@ -67,6 +67,7 @@
     }
   </style>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 
 <body class="bg-white">
@@ -85,19 +86,25 @@
         <a class="text-gray-600 hover:text-medicalBlue font-medium whitespace-nowrap" href="index.html">Home</a>
         <a class="text-medicalBlue font-semibold whitespace-nowrap" href="about.html">About</a>
         <a class="text-gray-600 hover:text-medicalBlue font-medium whitespace-nowrap" href="awareness.html">Features</a>
-        <a class="text-gray-600 hover:text-medicalBlue font-medium whitespace-nowrap" href="alerts.html">Outbreak
-          Alerts</a>
-        <a class="text-gray-600 hover:text-medicalBlue font-medium whitespace-nowrap"
-          href="reminders.html">Reminders</a>
+        <a class="text-gray-600 hover:text-medicalBlue font-medium whitespace-nowrap" href="alerts.html">Outbreak Alerts</a>
+        <a class="text-gray-600 hover:text-medicalBlue font-medium whitespace-nowrap" href="reminders.html">Reminders</a>
         <a class="bg-medicalBlue text-white px-5 py-2 rounded-full font-medium hover:bg-darkBlue transition-all whitespace-nowrap flex-shrink-0 flex items-center gap-2"
           href="chat.html">
           <span class="material-symbols-outlined text-sm">chat_bubble</span> Launch Chatbot
         </a>
       </div>
-      <!-- Mobile Menu Button -->
-      <button id="mobileMenuBtn" class="md:hidden p-2 text-medicalBlue hover:bg-softGreen rounded-lg transition-colors">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
+      <div class="flex items-center gap-3">
+          <div id="desktopAuthContainer" class="hidden sm:flex items-center gap-3">
+              <button onclick="window.location.href='login.html'"
+                  class="px-4 py-2 text-sm font-bold text-gray-600 hover:text-medicalBlue transition-colors cursor-pointer">Login</button>
+              <button onclick="window.location.href='signup.html'"
+                  class="px-5 py-2 bg-medicalBlue text-white text-sm font-bold rounded-full hover:bg-darkBlue transition-colors cursor-pointer">Sign Up</button>
+          </div>
+          <!-- Mobile Menu Button -->
+          <button id="mobileMenuBtn" class="md:hidden p-2 text-medicalBlue hover:bg-softGreen rounded-lg transition-colors">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+      </div>
     </div>
   </nav>
   <!-- END: Sticky Navbar -->
@@ -510,11 +517,9 @@
       <span class="material-symbols-outlined">chat_bubble</span> Launch AI Chat
     </a>
 
-    <div class="mt-auto pt-6 flex flex-col gap-3">
-      <button class="w-full py-3 text-sm font-bold text-slate-600 border border-slate-200 rounded-xl">Login</button>
-      <button
-        class="w-full py-3 bg-medicalBlue text-white text-sm font-bold rounded-xl shadow-lg shadow-medicalBlue/20">Sign
-        Up</button>
+    <div id="mobileAuthContainer" class="mt-auto pt-6 flex flex-col gap-3">
+      <button onclick="window.location.href='login.html'" class="w-full py-3 text-sm font-bold text-slate-600 border border-slate-200 rounded-xl cursor-pointer">Login</button>
+      <button onclick="window.location.href='signup.html'" class="w-full py-3 bg-medicalBlue text-white text-sm font-bold rounded-xl shadow-lg shadow-medicalBlue/20 cursor-pointer">Sign Up</button>
     </div>
   </div>
 

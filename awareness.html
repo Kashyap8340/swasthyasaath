@@ -14,6 +14,7 @@
         rel="stylesheet" />
     <title>SwasthyaSaathi AI | Health Awareness Library</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth.js"></script>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
@@ -45,7 +46,13 @@
                         <a class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary"
                             href="chat.html">Consult</a>
                     </nav>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-center">
+                        <div id="desktopAuthContainer" class="hidden sm:flex items-center gap-3 mr-4">
+                            <button onclick="window.location.href='login.html'"
+                                class="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors cursor-pointer">Login</button>
+                            <button onclick="window.location.href='signup.html'"
+                                class="px-5 py-2 bg-primary text-white text-sm font-bold rounded-full hover:bg-primary/90 transition-colors cursor-pointer">Sign Up</button>
+                        </div>
                         <button
                             class="flex items-center justify-center rounded-xl size-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                             <span class="material-symbols-outlined">notifications</span>
@@ -508,12 +515,9 @@
             <span class="material-symbols-outlined">chat_bubble</span> Launch AI Chat
         </a>
 
-        <div class="mt-auto pt-6 flex flex-col gap-3">
-            <button
-                class="w-full py-3 text-sm font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl">Login</button>
-            <button
-                class="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20">Sign
-                Up</button>
+        <div id="mobileAuthContainer" class="mt-auto pt-6 flex flex-col gap-3">
+            <button onclick="window.location.href='login.html'" class="w-full py-3 text-sm font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer">Login</button>
+            <button onclick="window.location.href='signup.html'" class="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-primary/20 cursor-pointer">Sign Up</button>
         </div>
     </div>
 

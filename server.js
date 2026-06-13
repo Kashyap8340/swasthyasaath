@@ -13,7 +13,13 @@ import util from 'util';
 import fs from 'fs';
 import nodemailer from 'nodemailer';
 import schedule from 'node-schedule';
+import twilio from 'twilio';
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import User from './models/User.js';
+import { OAuth2Client } from 'google-auth-library';
 
+const { twiml: { VoiceResponse } } = twilio;
 const execPromise = util.promisify(exec);
 
 // Helper: Digitizing images using Sarvam AI Document Digitization REST API
@@ -162,6 +168,116 @@ function cleanMessagesForTextModels(messages) {
     });
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// Unified AI Helper for Twilio SMS & Voice
+// ══════════════════════════════════════════════════════════════════════
+const twilioSessions = {};
+
+async function getUnifiedTextResponse(messages) {
+    const cleanedMessages = cleanMessagesForTextModels(messages);
+    
+    // 1. Groq (Llama 3.3)
+    try {
+        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+        const resp = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+            model: 'llama-3.3-70b-versatile',
+            messages: cleanedMessages,
+            stream: false
+        }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}` } });
+        if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+    } catch (e) { console.warn('[Unified AI] Groq Llama 3.3 failed', e.message); }
+
+    // 2. OpenRouter (Gemma 4 31b)
+    try {
+        const OR_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2;
+        const resp = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+            model: 'google/gemma-4-31b-it:free',
+            messages: cleanedMessages,
+            stream: false
+        }, { headers: { 'Authorization': `Bearer ${OR_KEY}` } });
+        if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+    } catch (e) { console.warn('[Unified AI] OR Gemma failed', e.message); }
+
+    // 3. Gemini Direct
+    try {
+        const GEMINI_KEY = process.env.GEMINI_API_KEY;
+        if (GEMINI_KEY) {
+            const systemMsg = messages.find(m => m.role === 'system');
+            const geminiBody = {
+                contents: messages.filter(m => m.role !== 'system').map(m => ({
+                    role: m.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }]
+                })),
+                systemInstruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined
+            };
+            const resp = await axios.post(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, geminiBody, { headers: { 'Content-Type': 'application/json' }});
+            if (resp.data.candidates?.[0]?.content?.parts?.[0]?.text) return resp.data.candidates[0].content.parts[0].text;
+        }
+    } catch (e) { console.warn('[Unified AI] Gemini failed', e.message); }
+
+    // 4. AgentRouter (DeepSeek)
+    try {
+        const AR_KEY = process.env.AGENTROUTER_API_KEY;
+        const AR_BASE = process.env.AGENTROUTER_BASE_URL;
+        if (AR_KEY && AR_BASE) {
+            const resp = await axios.post(`${AR_BASE}/chat/completions`, {
+                model: 'deepseek-v3.2',
+                messages: cleanedMessages,
+                stream: false
+            }, { headers: { 'Authorization': `Bearer ${AR_KEY}` } });
+            if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+        }
+    } catch (e) { console.warn('[Unified AI] AgentRouter failed', e.message); }
+
+    return "I am currently overloaded. Please try again in a moment.";
+}
+
+// Helper: Generate TTS MP3 file and return URL
+async function generateTTSFile(text, req) {
+    // Vercel serverless functions are stateless. We cannot save an MP3 and serve it on a subsequent request.
+    // So if we are on Vercel, we return null to trigger the Twilio native Polly.Aditi voice fallback!
+    if (process.env.VERCEL === '1' || process.env.VERCEL) {
+        return null;
+    }
+
+    const safeText = text.replace(/[*_`#~>|]/g, '').slice(0, 3000);
+    const id = Date.now() + Math.random().toString(36).substring(7);
+    const audioFile = `twilio_audio_${id}.mp3`;
+
+    // Try Sarvam
+    const sarvamKey = process.env.SARVAM_API_KEY;
+    if (sarvamKey) {
+        try {
+            const sarvamRes = await axios.post("https://api.sarvam.ai/text-to-speech/stream", {
+                text: safeText, target_language_code: "hi-IN", speaker: "shubh",
+                model: "bulbul:v3", pace: 1.1, speech_sample_rate: 22050,
+                output_audio_codec: "mp3", enable_preprocessing: true
+            }, { headers: { "api-subscription-key": sarvamKey }, responseType: 'arraybuffer' });
+            fs.writeFileSync(audioFile, Buffer.from(sarvamRes.data));
+            return `https://${req.get('host')}/${audioFile}`;
+        } catch (e) { console.warn('Sarvam TTS failed', e.message); }
+    }
+
+    // Try edge-tts
+    try {
+        const textFile = `temp_${id}.txt`;
+        fs.writeFileSync(textFile, safeText, 'utf8');
+        await execPromise(`edge-tts -f "${textFile}" --voice hi-IN-SwaraNeural --write-media "${audioFile}"`);
+        if (fs.existsSync(textFile)) fs.unlinkSync(textFile);
+        return `https://${req.get('host')}/${audioFile}`;
+    } catch (e) { console.warn('Edge TTS failed', e.message); }
+
+    // Try google-tts
+    try {
+        const urls = googleTTS.getAllAudioUrls(safeText, { lang: 'hi', slow: false });
+        const chunks = await Promise.all(urls.map(({ url }) => axios.get(url, { responseType: 'arraybuffer' }).then(r => Buffer.from(r.data))));
+        fs.writeFileSync(audioFile, Buffer.concat(chunks));
+        return `https://${req.get('host')}/${audioFile}`;
+    } catch (e) { console.error('All TTS failed', e.message); }
+    
+    return null;
+}
+
 // Configure Email Transporter
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -185,6 +301,157 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // Serve frontend static files from the same directory
 app.use(express.static(__dirname));
+
+// Connect to MongoDB
+if (process.env.MONGODB_URI) {
+    mongoose.connect(process.env.MONGODB_URI)
+        .then(() => console.log('✅ Connected to MongoDB'))
+        .catch(err => console.error('❌ MongoDB connection error:', err));
+} else {
+    console.warn('⚠️ MONGODB_URI not found in environment. Database will not be connected.');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// Auth Endpoints
+// ══════════════════════════════════════════════════════════════════════
+const otpStore = new Map();
+
+app.post('/api/send-otp', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ error: 'Email is required' });
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ error: 'Email already registered' });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Store OTP with 10 mins expiry
+        otpStore.set(email, {
+            otp,
+            expires: Date.now() + 10 * 60 * 1000
+        });
+
+        const mailOptions = {
+            from: `"SwasthyaSaathi AI" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'SwasthyaSaathi AI - Email Verification OTP',
+            text: `Your OTP for SwasthyaSaathi AI registration is: ${otp}\nIt is valid for 10 minutes.`,
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px;">
+                    <h2>Welcome to SwasthyaSaathi!</h2>
+                    <p>Your OTP for registration is:</p>
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 15px; border-radius: 10px; font-size: 24px; font-weight: bold; text-align: center; letter-spacing: 5px;">
+                        ${otp}
+                    </div>
+                    <p>It is valid for 10 minutes.</p>
+                    <p>Stay healthy!<br><strong>- SwasthyaSaathi AI</strong></p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'OTP sent successfully' });
+    } catch (error) {
+        console.error('[Send OTP] Error:', error);
+        res.status(500).json({ error: 'Failed to send OTP' });
+    }
+});
+
+app.post('/api/signup', async (req, res) => {
+    try {
+        const { fullName, email, mobile, password, otp } = req.body;
+        if (!fullName || !email || !mobile || !password || !otp) return res.status(400).json({ error: 'All fields including OTP are required' });
+
+        // Verify OTP
+        const storedOtpData = otpStore.get(email);
+        if (!storedOtpData) return res.status(400).json({ error: 'No OTP found or OTP expired. Please request a new one.' });
+        
+        if (Date.now() > storedOtpData.expires) {
+            otpStore.delete(email);
+            return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
+        }
+
+        if (storedOtpData.otp !== otp) {
+            return res.status(400).json({ error: 'Invalid OTP' });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ error: 'Email already registered' });
+
+        const user = new User({ fullName, email, mobile, password });
+        await user.save();
+
+        // Clear OTP after successful registration
+        otpStore.delete(email);
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'swasthyasaathi_super_secret', { expiresIn: '7d' });
+        res.status(201).json({ message: 'User created successfully', token, user: { id: user._id, fullName: user.fullName, email: user.email } });
+    } catch (error) {
+        console.error('[Signup] Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'swasthyasaathi_super_secret', { expiresIn: '7d' });
+        res.json({ message: 'Login successful', token, user: { id: user._id, fullName: user.fullName, email: user.email } });
+    } catch (error) {
+        console.error('[Login] Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) return res.status(400).json({ error: 'Credential is required' });
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+        const { sub, email, name } = payload;
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = new User({
+                fullName: name,
+                email: email,
+                authProvider: 'google',
+                googleId: sub
+            });
+            await user.save();
+        } else if (!user.googleId) {
+            // Link google account to existing local account
+            user.googleId = sub;
+            user.authProvider = 'google';
+            await user.save();
+        }
+
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'swasthyasaathi_super_secret', { expiresIn: '7d' });
+        res.json({ message: 'Google login successful', token, user: { id: user._id, fullName: user.fullName, email: user.email } });
+
+    } catch (error) {
+        console.error('[Google Auth] Error:', error);
+        res.status(500).json({ error: 'Google authentication failed' });
+    }
+});
 
 // Places API Proxy Route: SerpApi (Primary Google Maps) -> Foursquare (Secondary) -> OSM (Fallback)
 app.get('/api/places', async (req, res) => {
@@ -976,67 +1243,122 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// WhatsApp Endpoint Configured for Twilio
-app.post('/api/whatsapp', async (req, res) => {
+// Twilio SMS Webhook
+app.post('/api/twilio/sms', async (req, res) => {
     try {
         const incomingMsg = req.body.Body;
-        if (!incomingMsg) {
-            return res.status(400).send('No message body');
-        }
+        const from = req.body.From;
+        if (!incomingMsg) return res.status(400).send('No message body');
 
-        const postData = JSON.stringify({
-            model: "google/gemma-4-31b-it:free",
-            messages: [{ role: "user", content: incomingMsg }],
-            stream: false
-        });
+        if (!twilioSessions[from]) twilioSessions[from] = [];
+        
+        const systemPrompt = "You are SwasthyaSaathi AI, a deeply empathetic and caring health assistant. Reply with concise, warm SMS texts. Always express compassion if the user describes pain.";
+        
+        twilioSessions[from].push({ role: 'user', content: incomingMsg });
+        if (twilioSessions[from].length > 10) twilioSessions[from] = twilioSessions[from].slice(-10);
 
-        const options = {
-            hostname: 'openrouter.ai',
-            path: '/api/v1/chat/completions',
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
+        const messages = [
+            { role: "system", content: systemPrompt },
+            ...twilioSessions[from]
+        ];
 
-        let responseText = "AI Assistant is currently unavailable.";
+        const responseText = await getUnifiedTextResponse(messages);
+        
+        twilioSessions[from].push({ role: 'assistant', content: responseText });
 
-        const orReq = https.request(options, (orRes) => {
-            let data = '';
-            orRes.on('data', chunk => data += chunk);
-            orRes.on('end', () => {
-                if (orRes.statusCode === 200) {
-                    try {
-                        const parsed = JSON.parse(data);
-                        responseText = parsed.choices[0]?.message?.content || responseText;
-                    } catch (e) {
-                        console.error("Error parsing OpenRouter response", e);
-                    }
-                } else {
-                    console.error("OpenRouter API error:", data);
-                }
-
-                res.setHeader('Content-Type', 'text/xml');
-                res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Message>${responseText}</Message></Response>`);
-            });
-        });
-
-        orReq.on('error', (error) => {
-            console.error('Error proxying to OpenRouter:', error);
-            res.setHeader('Content-Type', 'text/xml');
-            res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Message>Error connecting to AI service.</Message></Response>`);
-        });
-
-        orReq.write(postData);
-        orReq.end();
-
+        res.setHeader('Content-Type', 'text/xml');
+        res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Message>${responseText}</Message></Response>`);
     } catch (error) {
-        console.error('WhatsApp Endpoint Error:', error);
+        console.error('Twilio SMS Endpoint Error:', error);
         res.setHeader('Content-Type', 'text/xml');
         res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Message>Internal Server Error.</Message></Response>`);
     }
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// Twilio Voice: Initial Call Handler
+// ══════════════════════════════════════════════════════════════════════
+app.post('/api/twilio/voice', async (req, res) => {
+    const from = req.body.From;
+    twilioSessions[from] = []; // Reset on new call
+    
+    const twiml = new VoiceResponse();
+    const gather = twiml.gather({
+        input: 'speech',
+        action: '/api/twilio/voice/gather',
+        timeout: 3,
+        language: 'en-IN',
+        speechTimeout: 'auto'
+    });
+
+    const greeting = "Hello, I am Swasthya Saathi AI. How can I help you with your health today?";
+    const audioUrl = await generateTTSFile(greeting, req);
+    
+    if (audioUrl) {
+        gather.play(audioUrl);
+    } else {
+        gather.say({ language: 'en-IN', voice: 'Polly.Aditi' }, greeting);
+    }
+
+    twiml.say({ language: 'en-IN', voice: 'Polly.Aditi' }, "We didn't receive any input. Goodbye!");
+    
+    res.setHeader('Content-Type', 'text/xml');
+    res.send(twiml.toString());
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// Twilio Voice: Gather Speech and Ask AI
+// ══════════════════════════════════════════════════════════════════════
+app.post('/api/twilio/voice/gather', async (req, res) => {
+    const speechResult = req.body.SpeechResult;
+    const from = req.body.From;
+    const twiml = new VoiceResponse();
+
+    if (speechResult) {
+        console.log(`[Twilio Voice] Caller said: ${speechResult}`);
+        if (!twilioSessions[from]) twilioSessions[from] = [];
+        
+        try {
+            twilioSessions[from].push({ role: 'user', content: speechResult });
+            if (twilioSessions[from].length > 10) twilioSessions[from] = twilioSessions[from].slice(-10);
+
+            const systemPrompt = "You are SwasthyaSaathi AI, a highly caring health assistant. Reply with very brief, warm, conversational sentences suitable for a phone call. Keep answers short (1-3 sentences maximum).";
+            
+            const messages = [
+                { role: "system", content: systemPrompt },
+                ...twilioSessions[from]
+            ];
+
+            const responseText = await getUnifiedTextResponse(messages);
+            twilioSessions[from].push({ role: 'assistant', content: responseText });
+            
+            console.log(`[Twilio Voice] AI replied: ${responseText}`);
+
+            const audioUrl = await generateTTSFile(responseText, req);
+
+            const gather = twiml.gather({
+                input: 'speech',
+                action: '/api/twilio/voice/gather',
+                timeout: 3,
+                language: 'en-IN'
+            });
+
+            if (audioUrl) {
+                gather.play(audioUrl);
+            } else {
+                gather.say({ language: 'en-IN', voice: 'Polly.Aditi' }, responseText);
+            }
+
+        } catch (err) {
+            console.error('[Twilio Voice] Error processing AI:', err);
+            twiml.say({ language: 'en-IN', voice: 'Polly.Aditi' }, "I'm sorry, my AI brain is taking a quick break.");
+        }
+    } else {
+        twiml.say({ language: 'en-IN', voice: 'Polly.Aditi' }, "I didn't catch that. Goodbye.");
+    }
+
+    res.setHeader('Content-Type', 'text/xml');
+    res.send(twiml.toString());
 });
 
 // Export app for Vercel

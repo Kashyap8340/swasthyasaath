@@ -1,0 +1,6 @@
+.wwebjs_auth/
+.wwebjs_cache/
+temp_*
+out_*
+qr.png
+test.zip
