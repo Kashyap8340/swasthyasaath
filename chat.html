@@ -1705,8 +1705,9 @@
                 chatContainer.appendChild(wrapper);
                 scrollToBottom();
 
-                // Auto-play AI voice reply
+                // Auto-play AI voice reply (User requested playing the whole reply once completed)
                 audio.play().catch(() => { });
+
             }
 
             // ── Main voice processing pipeline ──────────────────────────────
@@ -1799,74 +1800,6 @@
 
                     let responseLang = 'en';
                     let langDetected = false;
-                    let sentenceBuffer = "";
-                    let audioQueue = [];
-                    let isPlaying = false;
-                    let ttsActiveRequests = 0;
-
-                    function playNextInQueue() {
-                        if (audioQueue.length === 0) {
-                            isPlaying = false;
-                            return;
-                        }
-                        isPlaying = true;
-                        const audio = audioQueue.shift();
-                        audio.play().catch(e => {
-                            console.warn("Audio playback failed or was interrupted:", e);
-                            playNextInQueue(); // Skip and play next
-                        });
-                        audio.onended = () => {
-                            playNextInQueue();
-                        };
-                    }
-
-                    async function queueTTSChunk(text) {
-                        const cleanText = text
-                            .replace(/^\[[a-zA-Z-]+\]\s*/, '') // Strip starting lang tag
-                            .replace(/[*_`#~>|]/g, '') // Strip markdown
-                            .trim();
-                        
-                        if (!cleanText) return;
-                        ttsActiveRequests++;
-                        try {
-                            const res = await fetch('/api/tts', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ text: cleanText, lang: responseLang })
-                            });
-                            const data = await res.json();
-                            if (data.audioBase64) {
-                                const audio = new Audio(`data:audio/mp3;base64,${data.audioBase64}`);
-                                audioQueue.push(audio);
-                                if (!isPlaying) {
-                                    playNextInQueue();
-                                }
-                            }
-                        } catch (e) {
-                            console.error('Failed to fetch TTS chunk:', e);
-                        } finally {
-                            ttsActiveRequests--;
-                        }
-                    }
-
-                    function processSentenceStream(text, isDone) {
-                        sentenceBuffer += text;
-                        // Split by sentence delimiters: . ? ! । or newline
-                        const regex = /[^.!?।\n]+[.!?।\n]+/g;
-                        let match;
-                        let lastIndex = 0;
-                        while ((match = regex.exec(sentenceBuffer)) !== null) {
-                            const sentence = match[0];
-                            queueTTSChunk(sentence);
-                            lastIndex = regex.lastIndex;
-                        }
-                        sentenceBuffer = sentenceBuffer.slice(lastIndex);
-                        
-                        if (isDone && sentenceBuffer.trim()) {
-                            queueTTSChunk(sentenceBuffer);
-                            sentenceBuffer = "";
-                        }
-                    }
 
                     while (!done) {
                         const { value, done: rDone } = await reader.read();
@@ -1899,9 +1832,6 @@
                                                 }
                                             }
 
-                                            // Process newly added text chunk for TTS sentences
-                                            processSentenceStream(p.content, false);
-
                                             // Update display text in real-time
                                             let displayAI = fullAIResponse;
                                             if (displayAI.match(/^\[[a-zA-Z-]+\]/)) {
@@ -1922,8 +1852,7 @@
                         }
                     }
 
-                    // Flush any remaining sentence buffer
-                    processSentenceStream("", true);
+                    // Wait for stream to finish processing
 
                     if (!hasVoiceStreamError) {
                         let displayAI = fullAIResponse;

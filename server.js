@@ -176,18 +176,7 @@ const twilioSessions = {};
 async function getUnifiedTextResponse(messages) {
     const cleanedMessages = cleanMessagesForTextModels(messages);
     
-    // 1. Groq (Llama 3.3)
-    try {
-        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
-        const resp = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-            model: 'llama-3.3-70b-versatile',
-            messages: cleanedMessages,
-            stream: false
-        }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}` } });
-        if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
-    } catch (e) { console.warn('[Unified AI] Groq Llama 3.3 failed', e.message); }
-
-    // 2. OpenRouter (Gemma 4 31b)
+    // 1. OpenRouter (Gemma 4 31b)
     try {
         const OR_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2;
         const resp = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
@@ -197,6 +186,17 @@ async function getUnifiedTextResponse(messages) {
         }, { headers: { 'Authorization': `Bearer ${OR_KEY}` } });
         if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
     } catch (e) { console.warn('[Unified AI] OR Gemma failed', e.message); }
+
+    // 2. Groq (Llama 3.3)
+    try {
+        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+        const resp = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+            model: 'llama-3.3-70b-versatile',
+            messages: cleanedMessages,
+            stream: false
+        }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}` } });
+        if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+    } catch (e) { console.warn('[Unified AI] Groq Llama 3.3 failed', e.message); }
 
     // 3. Gemini Direct
     try {
@@ -303,12 +303,12 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 app.use(express.static(__dirname));
 
 // Connect to MongoDB
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGODB_URI)
+if (process.env.MONGODB_URI_LOCAL || process.env.MONGODB_URI) {
+    mongoose.connect(process.env.MONGODB_URI_LOCAL || process.env.MONGODB_URI, { family: 4 })
         .then(() => console.log('✅ Connected to MongoDB'))
         .catch(err => console.error('❌ MongoDB connection error:', err));
 } else {
-    console.warn('⚠️ MONGODB_URI not found in environment. Database will not be connected.');
+    console.warn('⚠️ MONGODB_URI_LOCAL not found in environment. Database will not be connected.');
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -581,43 +581,83 @@ app.post('/api/transcribe', async (req, res) => {
         const { audioBase64, mimeType = 'audio/webm', lang } = req.body;
         if (!audioBase64) return res.status(400).json({ error: 'audioBase64 required' });
 
-        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+        const GEMINI_KEY = process.env.GEMINI_API_KEY;
         const buffer   = Buffer.from(audioBase64, 'base64');
-
-        // Strip codec suffix (e.g. 'audio/webm;codecs=opus' -> 'audio/webm')
         const baseType = mimeType.split(';')[0].trim();
         const extMap   = { 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'mp4',
                            'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/opus': 'opus' };
         const ext      = extMap[baseType] || 'webm';
 
+        let text = '';
+
+        // 1. Primary: Groq Whisper with 3 Retries (Fastest)
         const formData = new FormData();
         formData.append('file', buffer, { filename: `audio.${ext}`, contentType: baseType });
         formData.append('model', 'whisper-large-v3');
         formData.append('response_format', 'json');
-
-        // Guide Whisper with language code if explicitly selected by user (non-English)
         if (lang && lang.toLowerCase() !== 'en') {
             formData.append('language', lang.toLowerCase());
         }
-
-        // Prevent Hindi audio from transcribing to Urdu Nastaliq script by providing a script-biasing prompt
         formData.append('prompt', 'Hello SwasthyaSaathi, health assistant. नमस्ते स्वास्थयसाथी, मुझे बुखार है। ନମସ୍କାର ସ୍ୱାସ୍ଥ୍ୟସାଥୀ।');
 
-        console.log(`[STT] Sending ${(buffer.length / 1024).toFixed(1)} KB as audio.${ext} to Groq...`);
+        let groqSuccess = false;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                console.log(`[STT] Sending ${(buffer.length / 1024).toFixed(1)} KB as audio.${ext} to Groq (Attempt ${attempt}/3)...`);
+                const response = await axios.post(
+                    'https://api.groq.com/openai/v1/audio/transcriptions',
+                    formData,
+                    { headers: { 'Authorization': `Bearer ${GROQ_KEY}`, ...formData.getHeaders() },
+                      maxBodyLength: Infinity, maxContentLength: Infinity }
+                );
+                text = response.data.text?.trim() || '';
+                if (text) {
+                    console.log(`[STT] ✅ Transcribed (Groq): "${text}"`);
+                    return res.json({ text });
+                }
+                groqSuccess = true;
+                break;
+            } catch (err) {
+                console.warn(`[STT] ⚠️ Groq attempt ${attempt} failed:`, err?.response?.data || err.message);
+                if (attempt < 3) {
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // wait 1.5s before retry
+                }
+            }
+        }
 
-        const response = await axios.post(
-            'https://api.groq.com/openai/v1/audio/transcriptions',
-            formData,
-            { headers: { 'Authorization': `Bearer ${GROQ_KEY}`, ...formData.getHeaders() },
-              maxBodyLength: Infinity, maxContentLength: Infinity }
-        );
-        const text = response.data.text?.trim() || '';
-        console.log(`[STT] ✅ Transcribed: "${text}"`);
-        return res.json({ text });
+        // 2. Fallback: Gemini 2.0 Flash (Audio support)
+        if (GEMINI_KEY) {
+            try {
+                console.log(`[STT] Sending audio to Gemini as fallback...`);
+                const geminiBody = {
+                    contents: [{
+                        parts: [
+                            { text: "You are a transcription assistant. Transcribe the spoken words in the attached audio accurately in its original language. Output ONLY the transcribed text and absolutely nothing else." },
+                            { inlineData: { mimeType: baseType, data: audioBase64 } }
+                        ]
+                    }]
+                };
+                const resp = await axios.post(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, geminiBody, { headers: { 'Content-Type': 'application/json' }});
+                text = resp.data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+                
+                // Strip possible markdown quotes that Gemini sometimes adds
+                text = text.replace(/^```[a-z]*\n/i, '').replace(/\n```$/i, '').trim();
+
+                if (text) {
+                    console.log(`[STT] ✅ Transcribed (Gemini): "${text}"`);
+                    return res.json({ text });
+                }
+            } catch (err) {
+                console.warn('[STT] ❌ Gemini fallback failed:', err?.response?.data || err.message);
+            }
+        }
+
+        throw new Error("All transcription services failed");
+
     } catch (err) {
-        const errDetail = err?.response?.data || err.message;
-        console.error('[STT] ❌ Groq error:', JSON.stringify(errDetail));
-        return res.status(500).json({ error: 'Transcription failed', detail: errDetail });
+        console.error('[STT] ❌ Final error:', err.message);
+        return res.status(500).json({ error: 'Transcription failed', detail: err.message });
     }
 });
 
@@ -655,69 +695,70 @@ app.post('/api/tts', async (req, res) => {
                 const targetLang = langMap[lang.toLowerCase()];
                 if (targetLang) {
                     console.log(`[TTS] Requesting Sarvam AI TTS for language: ${targetLang}...`);
-                    const sarvamRes = await fetch("https://api.sarvam.ai/text-to-speech/stream", {
-                        method: "POST",
-                        headers: {
-                            "api-subscription-key": sarvamKey,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            text: safeText,
-                            target_language_code: targetLang,
-                            speaker: "shubh",
-                            model: "bulbul:v3",
-                            pace: 1.1,
-                            speech_sample_rate: 22050,
-                            output_audio_codec: "mp3",
-                            enable_preprocessing: true
-                        })
-                    });
+                    
+                    // Sarvam AI has a 500-char limit per request. We chunk by sentences.
+                    const textChunks = safeText.match(/[^.!?।\n]+[.!?।\n]*/g) || [safeText];
+                    let currentChunk = '';
+                    const optimizedChunks = [];
+                    for (const c of textChunks) {
+                        if (currentChunk.length + c.length > 400) {
+                            if (currentChunk.trim()) optimizedChunks.push(currentChunk.trim());
+                            currentChunk = c;
+                        } else {
+                            currentChunk += c;
+                        }
+                    }
+                    if (currentChunk.trim()) optimizedChunks.push(currentChunk.trim());
 
-                    if (sarvamRes.ok) {
-                        const audioBuffer = await sarvamRes.arrayBuffer();
-                        const base64Audio = Buffer.from(audioBuffer).toString('base64');
-                        console.log('[TTS] Sarvam AI TTS succeeded');
+                    const audioBuffers = [];
+                    for (let i = 0; i < optimizedChunks.length; i++) {
+                        const chunk = optimizedChunks[i];
+                        const sarvamRes = await fetch("https://api.sarvam.ai/text-to-speech/stream", {
+                            method: "POST",
+                            headers: {
+                                "api-subscription-key": sarvamKey,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                text: chunk,
+                                target_language_code: targetLang,
+                                speaker: "shubh",
+                                model: "bulbul:v3",
+                                pace: 1.1,
+                                speech_sample_rate: 22050,
+                                output_audio_codec: "mp3",
+                                enable_preprocessing: true
+                            })
+                        });
+
+                        if (sarvamRes.ok) {
+                            const ab = await sarvamRes.arrayBuffer();
+                            audioBuffers.push(Buffer.from(ab));
+                        } else {
+                            const errTxt = await sarvamRes.text();
+                            console.warn(`[TTS] Sarvam AI failed on chunk ${i} with status ${sarvamRes.status}:`, errTxt);
+                            throw new Error(`Sarvam chunk ${i} failed: ${errTxt}`);
+                        }
+                    }
+
+                    if (audioBuffers.length > 0) {
+                        const mergedBuffer = Buffer.concat(audioBuffers);
+                        const base64Audio = mergedBuffer.toString('base64');
+                        console.log(`[TTS] Sarvam AI TTS succeeded (${optimizedChunks.length} chunks)`);
                         return res.json({ audioBase64: base64Audio });
-                    } else {
-                        console.warn(`[TTS] Sarvam AI failed with status ${sarvamRes.status}:`, await sarvamRes.text());
                     }
                 }
             } catch (sarvamErr) {
-                console.warn('[TTS] Sarvam AI TTS failed, falling back to edge-tts:', sarvamErr.message);
+                console.warn('[TTS] Sarvam AI TTS failed:', sarvamErr.message);
             }
+        } else {
+            console.warn('[TTS] Sarvam API Key not found');
         }
 
-        // ── Attempt 1: edge-tts (needs Python, works locally & on servers) ──
-        try {
-            const id = Date.now() + Math.random().toString(36).substring(7);
-            const textFile = `temp_${id}.txt`;
-            const audioFile = `out_${id}.mp3`;
-            fs.writeFileSync(textFile, safeText, 'utf8');
-            await execPromise(`edge-tts -f "${textFile}" --voice ${voice} --write-media "${audioFile}"`);
-            const base64Audio = fs.readFileSync(audioFile, { encoding: 'base64' });
-            if (fs.existsSync(textFile)) fs.unlinkSync(textFile);
-            if (fs.existsSync(audioFile)) fs.unlinkSync(audioFile);
-            console.log('[TTS] edge-tts succeeded');
-            return res.json({ audioBase64: base64Audio });
-        } catch (edgeErr) {
-            console.warn('[TTS] edge-tts failed, falling back to Google TTS:', edgeErr.message);
-        }
-
-        // ── Attempt 2: google-tts-api (pure JS, always works on Vercel) ──
-        const langCodeMap = { 'en': 'en', 'hi': 'hi', 'ta': 'ta', 'te': 'te', 'bn': 'bn', 'gu': 'gu', 'mr': 'mr', 'ml': 'ml', 'kn': 'kn', 'or': 'or', 'ur': 'ur' };
-        const gttsLang = langCodeMap[lang.toLowerCase()] || 'en';
-
-        const urls = googleTTS.getAllAudioUrls(safeText, { lang: gttsLang, slow: false, splitPunct: ',.?!' });
-        const chunks = await Promise.all(urls.map(({ url }) =>
-            axios.get(url, { responseType: 'arraybuffer' }).then(r => Buffer.from(r.data))
-        ));
-        const merged = Buffer.concat(chunks);
-        const base64Audio = merged.toString('base64');
-        console.log('[TTS] google-tts fallback succeeded');
-        return res.json({ audioBase64: base64Audio });
+        throw new Error("Sarvam TTS failed or language not supported");
 
     } catch (err) {
-        console.error('[TTS] All TTS methods failed:', err.message);
+        console.error('[TTS] Final error:', err.message);
         return res.status(500).json({ error: 'TTS failed' });
     }
 });
@@ -756,9 +797,21 @@ Use **bold** for section headings (e.g., **What is it**, **When to take it**, **
                 { role: 'user', content: userPrompt }
             ];
 
-            // 1. Groq Llama 3.3 (Primary - lightning fast and highly reliable)
+            // 1. OpenRouter Free Models (Primary)
+            for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free', 'meta-llama/llama-4-maverick:free']) {
+                try {
+                    const OR_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2;
+                    const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+                        model: model, messages: messages, stream: false
+                    }, { headers: { 'Authorization': `Bearer ${OR_KEY}`, 'Content-Type': 'application/json' } });
+                    const text = r.data.choices?.[0]?.message?.content?.trim();
+                    if (text) { console.log(`[Reminder AI] OpenRouter ${model} responded`); return text; }
+                } catch (e) { console.warn(`[Reminder AI] OpenRouter ${model} failed:`, e.message); }
+            }
+
+            // 2. Groq Llama 3.3 (Secondary)
             try {
-                const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+                const GROQ_KEY = process.env.GROQ_API_KEY || '';
                 const r = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
                     model: 'llama-3.3-70b-versatile',
                     messages: messages,
@@ -770,7 +823,7 @@ Use **bold** for section headings (e.g., **What is it**, **When to take it**, **
 
             // 2. Groq Llama 3.1 (Secondary)
             try {
-                const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+                const GROQ_KEY = process.env.GROQ_API_KEY || '';
                 const r = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
                     model: 'llama-3.1-8b-instant',
                     messages: messages,
@@ -970,7 +1023,7 @@ app.post('/api/chat', async (req, res) => {
 
         // ── HELPER: stream Groq (OpenAI-compatible, Lightning Fast) ───────────
         async function streamGroq(modelName) {
-            const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+            const GROQ_KEY = process.env.GROQ_API_KEY || '';
             const cleanedMessages = cleanMessagesForTextModels(messages);
             const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
@@ -1178,25 +1231,25 @@ app.post('/api/chat', async (req, res) => {
 
         // ── PATH B: TEXT — priority chain ─────────────────────────────────────
 
-        // 1. Groq (Llama 3.3 - Lightning Fast Primary)
-        for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
-            try {
-                console.log(`[1/6] Groq ${model} (Lightning Fast)...`);
-                await streamGroq(model);
-                console.log(`✅ [1/6] Groq ${model} responded!`);
-                return;
-            } catch (err) { console.warn(`❌ [1/6] Groq ${model}: ${err.message}`); }
-        }
-
-        // 2. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
+        // 1. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
         for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free']) {
             try {
-                console.log(`[2/6] OpenRouter ${model}...`);
+                console.log(`[1/6] OpenRouter ${model}...`);
                 const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
-                console.log(`✅ [2/6] OpenRouter ${model} responded!`);
+                console.log(`✅ [1/6] OpenRouter ${model} responded!`);
                 await pipeOpenRouter(orRes);
                 return;
-            } catch (err) { console.warn(`❌ [2/6] OpenRouter ${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [1/6] OpenRouter ${model}: ${err.message}`); }
+        }
+
+        // 2. Groq (Llama 3.3 - Lightning Fast Secondary)
+        for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
+            try {
+                console.log(`[2/6] Groq ${model} (Lightning Fast)...`);
+                await streamGroq(model);
+                console.log(`✅ [2/6] Groq ${model} responded!`);
+                return;
+            } catch (err) { console.warn(`❌ [2/6] Groq ${model}: ${err.message}`); }
         }
 
         // 3. Gemini direct (text fallback)

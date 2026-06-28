@@ -9,7 +9,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 import 'dotenv/config';
 
-process.env.GROQ_API_KEY = "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";
+process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
 // In-Memory global chat history for the bot
 let chatHistory = [];
