@@ -189,7 +189,7 @@ async function getUnifiedTextResponse(messages) {
 
     // 2. Groq (Llama 3.3)
     try {
-        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+        const GROQ_KEY = process.env.GROQ_API_KEY || '';
         const resp = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
             model: 'llama-3.3-70b-versatile',
             messages: cleanedMessages,
@@ -581,7 +581,7 @@ app.post('/api/transcribe', async (req, res) => {
         const { audioBase64, mimeType = 'audio/webm', lang } = req.body;
         if (!audioBase64) return res.status(400).json({ error: 'audioBase64 required' });
 
-        const GROQ_KEY = process.env.GROQ_API_KEY || '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';
+        const GROQ_KEY = process.env.GROQ_API_KEY || '';
         const GEMINI_KEY = process.env.GEMINI_API_KEY;
         const buffer   = Buffer.from(audioBase64, 'base64');
         const baseType = mimeType.split(';')[0].trim();
