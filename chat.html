@@ -499,9 +499,9 @@
             margin: 14px 0 6px 0;
             padding: 6px 10px;
             border-radius: 8px;
-            background: #f0f9ff;
-            border-left: 3px solid #0ea5e9;
-            color: #0369a1;
+            background: #fff0f6;
+            border-left: 3px solid #ec4899;
+            color: #be185d;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -514,9 +514,9 @@
 
         .dark .message-content h2,
         .dark .message-content h3 {
-            background: rgba(14, 165, 233, 0.08);
-            border-left-color: #38bdf8;
-            color: #7dd3fc;
+            background: rgba(236, 72, 153, 0.08);
+            border-left-color: #f472b6;
+            color: #f9a8d4;
         }
 
         .message-content p {
@@ -548,7 +548,7 @@
         }
 
         .message-content li::marker {
-            color: #0ea5e9;
+            color: #ec4899;
         }
 
         .message-content strong {
@@ -603,11 +603,11 @@
         }
 
         .detail-action-btn:hover {
-            border-color: #93c5fd;
-            color: #0369a1;
-            background: #f0f9ff;
+            border-color: #f9a8d4;
+            color: #be185d;
+            background: #fff0f6;
             transform: translateY(-1px);
-            box-shadow: 0 3px 12px rgba(14, 165, 233, 0.12);
+            box-shadow: 0 3px 12px rgba(236, 72, 153, 0.12);
         }
 
         .detail-action-btn .da-icon {
@@ -625,9 +625,9 @@
             color: #fff;
         }
 
-        .da-icon-blue { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+        .da-icon-blue { background: linear-gradient(135deg, #ec4899, #db2777); }
         .da-icon-green { background: linear-gradient(135deg, #10b981, #059669); }
-        .da-icon-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .da-icon-purple { background: linear-gradient(135deg, #c026d3, #a21caf); }
         .da-icon-orange { background: linear-gradient(135deg, #f59e0b, #ea580c); }
 
         .dark .detail-action-btn {
@@ -637,9 +637,9 @@
         }
 
         .dark .detail-action-btn:hover {
-            background: #0f172a;
-            border-color: #3b82f6;
-            color: #93c5fd;
+            background: #1e0a14;
+            border-color: #ec4899;
+            color: #f9a8d4;
         }
 
         /* ── Suggestion Pills (Footer) ─────────────────────── */
@@ -660,16 +660,16 @@
         }
 
         .suggestion-btn:hover {
-            background: #f0f9ff;
-            border-color: #0ea5e9;
-            color: #0369a1;
+            background: #fff0f6;
+            border-color: #ec4899;
+            color: #be185d;
             transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(14, 165, 233, 0.1);
+            box-shadow: 0 3px 10px rgba(236, 72, 153, 0.15);
         }
 
         .suggestion-btn .material-symbols-outlined {
             font-size: 14px;
-            color: #0ea5e9;
+            color: #ec4899;
         }
 
         .dark .suggestion-btn {
@@ -679,9 +679,9 @@
         }
 
         .dark .suggestion-btn:hover {
-            background: #0f172a;
-            border-color: #3b82f6;
-            color: #93c5fd;
+            background: #1e0a14;
+            border-color: #ec4899;
+            color: #f9a8d4;
         }
     </style>
     <script src="auth.js"></script>
@@ -855,10 +855,10 @@
                 <!-- System Greeting -->
                 <div class="flex flex-col items-center mb-4">
                     <div
-                        class="bg-blue-50 dark:bg-blue-900/10 px-6 py-4 rounded-2xl max-w-2xl text-center border border-blue-100 dark:border-blue-900/30">
-                        <h3 class="font-bold text-primary mb-1">Welcome back!</h3>
+                        class="bg-pink-50 dark:bg-pink-900/10 px-6 py-4 rounded-2xl max-w-2xl text-center border border-pink-100 dark:border-pink-900/30">
+                        <h3 class="font-bold text-pink-600 mb-1">🌸 Welcome back!</h3>
                         <p class="text-sm text-slate-600 dark:text-slate-400">Ask health-related questions and receive
-                            reliable guidance about diseases, prevention, vaccination, and health alerts.</p>
+                            reliable guidance about typhoid, prevention, vaccination, and health alerts.</p>
                     </div>
                 </div>
                 <!-- AI Message -->
@@ -881,16 +881,16 @@
                     <!-- Suggested Pills -->
                     <div id="suggestedPillsContainer" class="flex flex-wrap gap-2 justify-center">
                         <button class="suggestion-btn">
-                            <span class="material-symbols-outlined">chat_bubble_outline</span>
-                            How can I prevent viral fever?
+                            <span class="material-symbols-outlined">thermometer</span>
+                            What are typhoid symptoms?
                         </button>
                         <button class="suggestion-btn">
                             <span class="material-symbols-outlined">vaccines</span>
-                            Polio vaccination schedule?
+                            Typhoid vaccine — when to take it?
                         </button>
                         <button class="suggestion-btn">
-                            <span class="material-symbols-outlined">location_on</span>
-                            Nearby health centers?
+                            <span class="material-symbols-outlined">restaurant</span>
+                            Foods to eat & avoid in typhoid?
                         </button>
                     </div>
                     <!-- Image preview strip (shown when images are queued) -->
@@ -1464,7 +1464,7 @@
                 `;
 
                 // Reset Suggestion Pills to default
-                const defaultSuggestions = ["How can I prevent viral fever?", "Polio vaccination schedule?", "Nearby health centers?"];
+                const defaultSuggestions = ["What are typhoid symptoms?", "Typhoid vaccine — when to take it?", "Foods to eat & avoid in typhoid?"];
                 renderSuggestions(defaultSuggestions);
             }
 
