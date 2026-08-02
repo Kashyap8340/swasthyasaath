@@ -176,29 +176,20 @@ const twilioSessions = {};
 async function getUnifiedTextResponse(messages) {
     const cleanedMessages = cleanMessagesForTextModels(messages);
     
-    // 1. OpenRouter (Gemma 4 31b)
-    try {
-        const OR_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2;
-        const resp = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
-            model: 'google/gemma-4-31b-it:free',
-            messages: cleanedMessages,
-            stream: false
-        }, { headers: { 'Authorization': `Bearer ${OR_KEY}` } });
-        if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
-    } catch (e) { console.warn('[Unified AI] OR Gemma failed', e.message); }
-
-    // 2. Groq (Llama 3.3)
+    // 1. Groq (Llama 3.3 - Lightning Fast)
     try {
         const GROQ_KEY = process.env.GROQ_API_KEY || '';
-        const resp = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-            model: 'llama-3.3-70b-versatile',
-            messages: cleanedMessages,
-            stream: false
-        }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}` } });
-        if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+        if (GROQ_KEY) {
+            const resp = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                model: 'llama-3.3-70b-versatile',
+                messages: cleanedMessages,
+                stream: false
+            }, { headers: { 'Authorization': `Bearer ${GROQ_KEY}` } });
+            if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+        }
     } catch (e) { console.warn('[Unified AI] Groq Llama 3.3 failed', e.message); }
 
-    // 3. Gemini Direct
+    // 2. Gemini Direct
     try {
         const GEMINI_KEY = process.env.GEMINI_API_KEY;
         if (GEMINI_KEY) {
@@ -214,6 +205,19 @@ async function getUnifiedTextResponse(messages) {
             if (resp.data.candidates?.[0]?.content?.parts?.[0]?.text) return resp.data.candidates[0].content.parts[0].text;
         }
     } catch (e) { console.warn('[Unified AI] Gemini failed', e.message); }
+
+    // 3. OpenRouter (Gemma 4 31b)
+    try {
+        const OR_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2;
+        if (OR_KEY) {
+            const resp = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+                model: 'google/gemma-4-31b-it:free',
+                messages: cleanedMessages,
+                stream: false
+            }, { headers: { 'Authorization': `Bearer ${OR_KEY}` } });
+            if (resp.data.choices?.[0]?.message?.content) return resp.data.choices[0].message.content;
+        }
+    } catch (e) { console.warn('[Unified AI] OR Gemma failed', e.message); }
 
     // 4. AgentRouter (DeepSeek)
     try {
@@ -1229,56 +1233,56 @@ app.post('/api/chat', async (req, res) => {
             }
         }
 
-        // ── PATH B: TEXT — priority chain ─────────────────────────────────────
+        // ── PATH B: TEXT — priority chain (GROQ & GEMINI FIRST FOR LIGHTNING SPEED) ──
 
-        // 1. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
-        for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free']) {
-            try {
-                console.log(`[1/6] OpenRouter ${model}...`);
-                const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
-                console.log(`✅ [1/6] OpenRouter ${model} responded!`);
-                await pipeOpenRouter(orRes);
-                return;
-            } catch (err) { console.warn(`❌ [1/6] OpenRouter ${model}: ${err.message}`); }
-        }
-
-        // 2. Groq (Llama 3.3 - Lightning Fast Secondary)
+        // 1. Groq (Llama 3.3 / Llama 3.1 — Lightning Fast Real-Time Inference)
         for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
             try {
-                console.log(`[2/6] Groq ${model} (Lightning Fast)...`);
+                console.log(`[1/5] Groq ${model} (Lightning Fast)...`);
                 await streamGroq(model);
-                console.log(`✅ [2/6] Groq ${model} responded!`);
+                console.log(`✅ [1/5] Groq ${model} responded!`);
                 return;
-            } catch (err) { console.warn(`❌ [2/6] Groq ${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [1/5] Groq ${model}: ${err.message}`); }
         }
 
-        // 3. Gemini direct (text fallback)
+        // 2. Gemini direct (text fallback - ultra fast)
         try {
-            console.log('[3/6] Gemini direct (text fallback)...');
+            console.log('[2/5] Gemini direct (text fallback)...');
             await streamGemini();
-            console.log('✅ [3/6] Gemini text fallback responded!');
+            console.log('✅ [2/5] Gemini text fallback responded!');
             return;
-        } catch (err) { console.warn(`❌ [3/6] Gemini: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [2/5] Gemini: ${err.message}`); }
 
-        // 4. OpenRouter Venice Fallbacks (Llama & Qwen - Venice is sometimes rate-limited)
-        for (const model of ['meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-next-80b-a3b-instruct:free', 'meta-llama/llama-3.2-3b-instruct:free']) {
+        // 3. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
+        for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free']) {
             try {
-                console.log(`[4/6] OpenRouter Venice ${model}...`);
+                console.log(`[3/5] OpenRouter ${model}...`);
                 const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
-                console.log(`✅ [4/6] OpenRouter Venice ${model} responded!`);
+                console.log(`✅ [3/5] OpenRouter ${model} responded!`);
                 await pipeOpenRouter(orRes);
                 return;
-            } catch (err) { console.warn(`❌ [4/6] OpenRouter Venice ${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [3/5] OpenRouter ${model}: ${err.message}`); }
+        }
+
+        // 4. OpenRouter Venice Fallbacks (Llama & Qwen)
+        for (const model of ['meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-next-80b-a3b-instruct:free', 'meta-llama/llama-3.2-3b-instruct:free']) {
+            try {
+                console.log(`[4/5] OpenRouter Venice ${model}...`);
+                const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
+                console.log(`✅ [4/5] OpenRouter Venice ${model} responded!`);
+                await pipeOpenRouter(orRes);
+                return;
+            } catch (err) { console.warn(`❌ [4/5] OpenRouter Venice ${model}: ${err.message}`); }
         }
 
         // 5. AgentRouter — DeepSeek (r1-0528 → v3.2 → v3.1)
         for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
             try {
-                console.log(`[5/6] AgentRouter / ${model}...`);
+                console.log(`[5/5] AgentRouter / ${model}...`);
                 await streamAgentRouter(model);
-                console.log(`✅ [5/6] AgentRouter/${model} responded!`);
+                console.log(`✅ [5/5] AgentRouter/${model} responded!`);
                 return;
-            } catch (err) { console.warn(`❌ [5/6] AgentRouter/${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [5/5] AgentRouter/${model}: ${err.message}`); }
         }
 
         // All models exhausted
