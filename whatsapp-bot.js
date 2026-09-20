@@ -151,7 +151,7 @@ function getAIResponse(historyRef, userMessage, isVoice = false) {
         if (historyRef.length > MAX_HISTORY) historyRef.splice(0, historyRef.length - MAX_HISTORY);
 
         const postData = JSON.stringify({
-            model: "google/gemma-4-31b-it:free",
+            model: "nvidia/nemotron-3-ultra-550b-a55b:free",
             messages: [
                 { role: "system", content: systemPrompt },
                 ...historyRef

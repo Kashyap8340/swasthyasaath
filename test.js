@@ -10,7 +10,7 @@ async function main() {
     // Stream the response to get reasoning tokens in usage
     const stream = await openrouter.chat.send({
       chatGenerationParams: {
-        model: "moonshotai/kimi-k2.6:free",
+        model: "nvidia/nemotron-3-ultra-550b-a55b:free",
         messages: [
           {
             role: "user",

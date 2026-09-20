@@ -802,7 +802,7 @@ Use **bold** for section headings (e.g., **What is it**, **When to take it**, **
             ];
 
             // 1. OpenRouter Free Models (Primary)
-            for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free', 'meta-llama/llama-4-maverick:free']) {
+            for (const model of ['nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free', 'meta-llama/llama-4-maverick:free']) {
                 try {
                     const OR_KEY = process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2;
                     const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
@@ -853,7 +853,7 @@ Use **bold** for section headings (e.g., **What is it**, **When to take it**, **
             } catch (e) { console.warn('[Reminder AI] Gemini failed:', e.message); }
 
             // 4. OpenRouter Free Models (Gemma 4 / Llama 4 as last resort)
-            for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free', 'meta-llama/llama-4-maverick:free']) {
+            for (const model of ['nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free', 'meta-llama/llama-4-maverick:free']) {
                 try {
                     const r = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
                         model: model, stream: false, messages
@@ -963,8 +963,8 @@ Use **bold** for section headings (e.g., **What is it**, **When to take it**, **
 // Chat Endpoint — Smart AI Routing
 // ══════════════════════════════════════════════════════════════════════
 //
-// TEXT priority:       1. Kimi-k2.6       2. AgentRouter DeepSeek
-//                      3. Qwen            4. Gemini direct   5. Llama
+// TEXT priority:       1. Nemotron        2. Groq
+//                      3. Gemini direct   4. OpenRouter fallbacks
 //
 // IMAGE / VOICE:       Gemini first (only multimodal model in chain)
 //                      → falls through to text chain if Gemini fails
@@ -1131,8 +1131,10 @@ app.post('/api/chat', async (req, res) => {
 
         // ── HELPER: pipe an open OpenRouter stream to the client ──────────────
         function pipeOpenRouter(orRes) {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 let buf = '';
+                let hasContent = false;
+                let settled = false;
                 orRes.on('data', (chunk) => {
                     buf += chunk.toString('utf-8');
                     const lines = buf.split('\n');
@@ -1141,14 +1143,38 @@ app.post('/api/chat', async (req, res) => {
                         if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                             try {
                                 const parsed = JSON.parse(line.slice(6));
+                                const providerError = parsed.error || parsed.choices?.[0]?.error;
+                                if (providerError) {
+                                    settled = true;
+                                    orRes.destroy();
+                                    reject(new Error(`OpenRouter stream error: ${providerError.message || JSON.stringify(providerError)}`));
+                                    return;
+                                }
                                 const content = parsed.choices?.[0]?.delta?.content;
-                                if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                                if (content) {
+                                    hasContent = true;
+                                    res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                                }
                             } catch (_) {}
                         }
                     }
                 });
-                orRes.on('end',   () => { res.write('data: [DONE]\n\n'); res.end(); resolve(); });
-                orRes.on('error', () => { res.end(); resolve(); });
+                orRes.on('end', () => {
+                    if (settled) return;
+                    if (!hasContent) {
+                        settled = true;
+                        reject(new Error('OpenRouter stream ended without content'));
+                        return;
+                    }
+                    res.write('data: [DONE]\n\n');
+                    res.end();
+                    resolve();
+                });
+                orRes.on('error', (error) => {
+                    if (settled) return;
+                    settled = true;
+                    reject(error);
+                });
             });
         }
 
@@ -1233,56 +1259,68 @@ app.post('/api/chat', async (req, res) => {
             }
         }
 
-        // ── PATH B: TEXT — priority chain (GROQ & GEMINI FIRST FOR LIGHTNING SPEED) ──
+        // ── PATH B: TEXT — priority chain ───────────────────────────────────
 
-        // 1. Groq (Llama 3.3 / Llama 3.1 — Lightning Fast Real-Time Inference)
+        // 1. OpenRouter Nemotron (primary text model)
+        try {
+            console.log('[1/6] OpenRouter Nemotron...');
+            const orRes = await connectOpenRouter(
+                'nvidia/nemotron-3-ultra-550b-a55b:free',
+                process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2
+            );
+            console.log('✅ [1/6] OpenRouter Nemotron responded!');
+            await pipeOpenRouter(orRes);
+            return;
+        } catch (err) { console.warn(`❌ [1/6] OpenRouter Nemotron: ${err.message}`); }
+
+        // 2. Groq (Llama 3.3 / Llama 3.1 — Lightning Fast Real-Time Inference)
         for (const model of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant']) {
             try {
-                console.log(`[1/5] Groq ${model} (Lightning Fast)...`);
+                console.log(`[2/6] Groq ${model} (Lightning Fast)...`);
                 await streamGroq(model);
-                console.log(`✅ [1/5] Groq ${model} responded!`);
+                console.log(`✅ [2/6] Groq ${model} responded!`);
                 return;
-            } catch (err) { console.warn(`❌ [1/5] Groq ${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [2/6] Groq ${model}: ${err.message}`); }
         }
 
-        // 2. Gemini direct (text fallback - ultra fast)
+        // 3. Gemini direct (text fallback - ultra fast)
         try {
-            console.log('[2/5] Gemini direct (text fallback)...');
+            console.log('[3/6] Gemini direct (text fallback)...');
             await streamGemini();
-            console.log('✅ [2/5] Gemini text fallback responded!');
+            console.log('✅ [3/6] Gemini text fallback responded!');
             return;
-        } catch (err) { console.warn(`❌ [2/5] Gemini: ${err.message}`); }
+        } catch (err) { console.warn(`❌ [3/6] Gemini: ${err.message}`); }
 
-        // 3. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
+        // 4. OpenRouter Reliable Free Models (Gemma 4 31B & 26B)
         for (const model of ['google/gemma-4-31b-it:free', 'google/gemma-4-26b-a4b-it:free']) {
             try {
-                console.log(`[3/5] OpenRouter ${model}...`);
+                console.log(`[4/6] OpenRouter ${model}...`);
                 const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
-                console.log(`✅ [3/5] OpenRouter ${model} responded!`);
+                console.log(`✅ [4/6] OpenRouter ${model} responded!`);
                 await pipeOpenRouter(orRes);
                 return;
-            } catch (err) { console.warn(`❌ [3/5] OpenRouter ${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [4/6] OpenRouter ${model}: ${err.message}`); }
         }
 
-        // 4. OpenRouter Venice Fallbacks (Llama & Qwen)
+        // 5. OpenRouter Venice Fallbacks (Llama & Qwen)
         for (const model of ['meta-llama/llama-3.3-70b-instruct:free', 'qwen/qwen3-next-80b-a3b-instruct:free', 'meta-llama/llama-3.2-3b-instruct:free']) {
             try {
-                console.log(`[4/5] OpenRouter Venice ${model}...`);
+                console.log(`[5/6] OpenRouter Venice ${model}...`);
                 const orRes = await connectOpenRouter(model, process.env.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY_2);
-                console.log(`✅ [4/5] OpenRouter Venice ${model} responded!`);
+                console.log(`✅ [5/6] OpenRouter Venice ${model} responded!`);
                 await pipeOpenRouter(orRes);
                 return;
-            } catch (err) { console.warn(`❌ [4/5] OpenRouter Venice ${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [5/6] OpenRouter Venice ${model}: ${err.message}`); }
         }
 
-        // 5. AgentRouter — DeepSeek (r1-0528 → v3.2 → v3.1)
+        // 6. AgentRouter — DeepSeek (r1-0528 → v3.2 → v3.1)
         for (const model of ['deepseek-r1-0528', 'deepseek-v3.2', 'deepseek-v3.1']) {
             try {
-                console.log(`[5/5] AgentRouter / ${model}...`);
+                console.log(`[6/6] AgentRouter / ${model}...`);
                 await streamAgentRouter(model);
-                console.log(`✅ [5/5] AgentRouter/${model} responded!`);
+                console.log(`✅ [6/6] AgentRouter/${model} responded!`);
                 return;
-            } catch (err) { console.warn(`❌ [5/5] AgentRouter/${model}: ${err.message}`); }
+            } catch (err) { console.warn(`❌ [6/6] AgentRouter/${model}: ${err.message}`); }
         }
 
         // All models exhausted
